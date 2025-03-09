@@ -23,21 +23,3 @@ export interface IBaseSettings {
     rememberPwd: boolean
   }
 }
-
-export interface IUser {
-  id?: string
-  name: string
-  email: string
-  password: string
-  avatar: string
-  username: string
-  phone: string
-  zalo?: string
-  company?: string
-  btInfo: {
-    link: string
-    userName: string
-    password: string
-    ipList: string[][]
-  }
-}

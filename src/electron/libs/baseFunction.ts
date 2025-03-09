@@ -2,23 +2,22 @@ import { join } from 'path'
 import puppeteer from 'puppeteer-extra'
 
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
+import { IUser } from '../model/userInfomation'
 const stealthPlugin = StealthPlugin()
 stealthPlugin.enabledEvasions.delete('iframe.contentWindow')
 stealthPlugin.enabledEvasions.delete('media.codecs')
 puppeteer.use(stealthPlugin)
 
-export async function lauch(
-  proxy: string,
-  userid: string,
-  headless: boolean,
-  position: string,
-  userDataDir: string,
-) {
+export const timeout = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+export async function lauch(user: IUser, headless: boolean, position: string, userDataDir: string) {
   let proxyURL = ''
   let proxyUsername = ''
   let proxyPassword = ''
-  if (proxy) {
-    const proxyList = proxy
+  if (user.proxy) {
+    const proxyList = user.proxy
       .replace('http://', '')
       .split(':')
       .map((x) => x.trim())
@@ -33,8 +32,8 @@ export async function lauch(
     headless,
     executablePath: join(userDataDir, 'chrome.exe'),
     defaultViewport: {
-      width: 1920,
-      height: 980,
+      width: 1400,
+      height: 900,
     },
     args: [
       '--window-size=360,360',
@@ -44,7 +43,7 @@ export async function lauch(
       '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
       position,
     ],
-    userDataDir: join(userDataDir, 'browser-data', userid),
+    userDataDir: join(userDataDir, 'browser-data', user.id),
   }
   if (proxyURL) {
     params.args.push(`--proxy-server=${proxyURL}`)

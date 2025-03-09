@@ -5,13 +5,13 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'base-setting',
-      component: () => import('../views/BaseSetiings.vue'),
+      name: 'account-manage',
+      component: () => import('../views/AccountManage.vue'),
     },
     {
-      path: '/web-manage',
-      name: 'web-manage',
-      component: () => import('../views/WebManage.vue'),
+      path: '/seeding',
+      name: 'seeding',
+      component: () => import('../views/SeedingVideo.vue'),
     },
     {
       path: '/login',

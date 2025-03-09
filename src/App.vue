@@ -25,14 +25,14 @@ const hideSelect = ref(false)
 
 const navMenu = ref([
   {
-    name: 'baseSetting',
+    name: 'accountManage',
     path: '/',
-    pathName: 'base-setting',
+    pathName: 'account-manage',
   },
   {
-    name: 'webManage',
-    path: '/web-manage',
-    pathName: 'web-manage',
+    name: 'seeding',
+    path: '/seeding',
+    pathName: 'seeding',
   },
 ])
 const isFirst = ref(false)
