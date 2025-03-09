@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
-import { IUser } from '../model/userInfomation'
+import { IAccount } from '../model/userInfomation'
 import { lauch, timeout } from './baseFunction'
 import { parentPort } from 'worker_threads'
 
@@ -9,7 +9,11 @@ stealthPlugin.enabledEvasions.delete('iframe.contentWindow')
 stealthPlugin.enabledEvasions.delete('media.codecs')
 puppeteer.use(stealthPlugin)
 
-export async function loginGmail(listUser: Array<IUser>, headless: boolean, userDataDir: string) {
+export async function loginGmail(
+  listUser: Array<IAccount>,
+  headless: boolean,
+  userDataDir: string,
+) {
   for (let index = 0; index < listUser.length; index++) {
     const user = listUser[index]
     const pX = (index % 5) * 360
@@ -19,7 +23,11 @@ export async function loginGmail(listUser: Array<IUser>, headless: boolean, user
   }
 }
 
-export async function loginOutlook(listUser: Array<IUser>, headless: boolean, userDataDir: string) {
+export async function loginOutlook(
+  listUser: Array<IAccount>,
+  headless: boolean,
+  userDataDir: string,
+) {
   for (let index = 0; index < listUser.length; index++) {
     const user = listUser[index]
     const pX = (index % 5) * 360
@@ -30,7 +38,7 @@ export async function loginOutlook(listUser: Array<IUser>, headless: boolean, us
 }
 
 async function userLoginGmail(
-  user: IUser,
+  user: IAccount,
   headless: boolean,
   position: string,
   userDataDir: string,
@@ -101,7 +109,7 @@ async function userLoginGmail(
 }
 
 async function userLoginOutLook(
-  user: IUser,
+  user: IAccount,
   headless: boolean,
   position: string,
   userDataDir: string,

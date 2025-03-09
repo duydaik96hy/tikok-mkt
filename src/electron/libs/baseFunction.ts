@@ -2,7 +2,7 @@ import { join } from 'path'
 import puppeteer from 'puppeteer-extra'
 
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
-import { IUser } from '../model/userInfomation'
+import { IAccount } from '../model/userInfomation'
 const stealthPlugin = StealthPlugin()
 stealthPlugin.enabledEvasions.delete('iframe.contentWindow')
 stealthPlugin.enabledEvasions.delete('media.codecs')
@@ -12,7 +12,12 @@ export const timeout = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export async function lauch(user: IUser, headless: boolean, position: string, userDataDir: string) {
+export async function lauch(
+  user: IAccount,
+  headless: boolean,
+  position: string,
+  userDataDir: string,
+) {
   let proxyURL = ''
   let proxyUsername = ''
   let proxyPassword = ''
