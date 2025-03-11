@@ -3,11 +3,10 @@ export interface IAccount {
   name: string
   username: string
   password: string
-  gmail: string
-  passGmail: string
-  outlook: string
+  email: string
+  passEmail: string
   emailRecover: string
-  passOutlook: string
+  pwdEmailRecover: string
   proxy?: string
   folder: string
   isSelected?: boolean

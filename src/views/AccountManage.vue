@@ -3,7 +3,7 @@ import IconRefresh from '../components/icons/IconRefresh.vue'
 import IHeaders from '../components/IHeaders.vue'
 import ITableData from '../components/ITableData.vue'
 import SelectItem from '../components/SelectItem.vue'
-import { ref, getCurrentInstance, watch } from 'vue'
+import { ref, getCurrentInstance } from 'vue'
 import { Store } from '../stores'
 const { proxy } = getCurrentInstance()
 
@@ -15,59 +15,38 @@ const hideSelect = ref(false)
 
 const head = ref([
   {
-    value: 'uid',
-    name: 'UID',
+    value: 'name',
+    name: 'name',
+  },
+  {
+    value: 'username',
+    name: 'username',
   },
   {
     value: 'password',
     name: 'password',
   },
   {
-    value: 'privateKey',
-    name: 'Private Key',
+    value: 'email',
+    name: 'email',
+  },
+  {
+    value: 'passEmail',
+    name: 'passEmail',
+  },
+  {
+    value: 'emailRecover',
+    name: 'emailRecover',
+  },
+  {
+    value: 'pwdEmailRecover',
+    name: 'pwdEmailRecover',
   },
   {
     value: 'proxy',
-    name: 'Proxy',
-  },
-  {
-    value: 'cookies',
-    name: 'Cookies',
-  },
-  {
-    value: 'token',
-    name: 'Token',
-  },
-  {
-    value: 'email',
-    name: 'Email',
-  },
-  {
-    value: 'passwordMail',
-    name: 'passwordMail',
-  },
-  {
-    value: 'recoveryMail',
-    name: 'recoveryMail',
-  },
-  {
-    value: 'recoveryMailPassword',
-    name: 'recoveryMailPassword',
-  },
-  {
-    value: 'birthday',
-    name: 'birthday',
-  },
-  {
-    value: 'status',
-    name: 'accountStatus',
+    name: 'proxy',
   },
 ])
-
-head.value = head.value.map((x) => {
-  const item = store.showCol.find((s) => x.value == s.value)
-  return { ...x, show: item ? item.show : true }
-})
 
 const menuList = [
   {
@@ -82,30 +61,18 @@ const menuList = [
     icon: `AccountAdd`,
     type: 1,
   },
-  {
-    name: 'selectDisplayFields',
-    value: 2,
-    icon: `Monitor`,
-    type: 2,
-  },
 ]
 const changeMenu = () => {
   // console.log(val)
 }
-watch(store, (_n) => {
-  head.value = head.value.map((x) => {
-    const item = _n.showCol.find((s) => x.value == s.value)
-    return { ...x, show: item ? item.show : true }
-  })
-})
 
 const selectedFolder = ref('')
-proxy.$localSocket.on('selected-folder', (data) => {
-  list.value = data
-})
+// proxy.$localSocket.on('selected-folder', (data) => {
+//   list.value = data
+// })
 
 const changeFolder = (e, val) => {
-  proxy.$localSocket.emit('selected-folder', val == proxy.$t('all') ? 'all' : val)
+  // proxy.$localSocket.emit('selected-folder', val == proxy.$t('all') ? 'all' : val)
   selectedFolder.value = val
 }
 </script>
@@ -137,6 +104,7 @@ const changeFolder = (e, val) => {
 </template>
 
 <style lang="scss" scoped>
-.account-manager {
+.head-nav {
+  position: unset;
 }
 </style>

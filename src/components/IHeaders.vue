@@ -37,9 +37,9 @@
         <h1 style="border-bottom: 1px solid #f06305; padding: 10px">{{ props.title }}</h1>
       </template>
       <template #default>
-        <div v-if="props.type == 0">
+        <!-- <div v-if="props.type == 0">
           <ViralMarketing />
-        </div>
+        </div> -->
         <div v-if="props.type == 1" class="main-bg">
           <BaseInteractive />
         </div>
@@ -123,6 +123,9 @@
   </div>
 </template>
 <script lang="ts" setup>
+import AccountFolderManage from './AccountManage/AccountFolderManage.vue'
+import AddAccount from './AccountManage/AddAccount.vue'
+import EleIcon from './icons/EleIcon.vue'
 import { ref } from 'vue'
 
 const emit = defineEmits(['change'])

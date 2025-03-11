@@ -1,13 +1,12 @@
 <script lang="ts" setup>
-import IHeaders from '@/components/IHeaders.vue'
-import ITableData from '@/components/ITableData.vue'
-import SelectItem from '@/components/SelectItem.vue'
-import IconRefresh from '@/components/icons/IconRefresh.vue'
+import IHeaders from '../components/IHeaders.vue'
+import SelectItem from '../components/SelectItem.vue'
+import ITableData from '../components/ITableData.vue'
 import { ref, getCurrentInstance } from 'vue'
-import { accountManageStore } from '@/stores'
+import { Store } from '../stores'
 
 const { proxy } = getCurrentInstance()
-const store = accountManageStore()
+const store = Store()
 const list = ref(store.accountList)
 const accountFolderList = ref(store.accountFolderList)
 const head = ref([
@@ -23,12 +22,12 @@ const head = ref([
 const showSelect = ref(false)
 const hideSelect = ref(false)
 const selectedFolder = ref('')
-proxy.$localSocket.on('selected-folder', (data) => {
-  list.value = data
-})
+// proxy.$localSocket.on('selected-folder', (data) => {
+//   list.value = data
+// })
 
 const changeFolder = (e, val) => {
-  proxy.$localSocket.emit('selected-folder', val == proxy.$t('all') ? 'all' : val)
+  // proxy.$localSocket.emit('selected-folder', val == proxy.$t('all') ? 'all' : val)
   selectedFolder.value = val
 }
 </script>

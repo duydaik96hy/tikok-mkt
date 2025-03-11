@@ -213,11 +213,12 @@ input {
   .right {
     height: 100%;
     position: relative;
+    background: url('@/assets/bg.png') top left repeat;
   }
   .left {
     width: 300px;
     margin-right: 20px;
-    background: url('@/assets/bg.png') top left repeat;
+
     li {
       text-transform: capitalize;
     }

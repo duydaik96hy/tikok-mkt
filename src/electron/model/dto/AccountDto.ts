@@ -1,15 +1,15 @@
-import { randomUUID } from 'crypto'
-
+import { v4 as idv4 } from 'uuid'
+import { IEmail } from '../userInfomation'
 export class AcountDto {
-  id = randomUUID()
+  id = idv4()
   name = ''
   proxy = ''
   username = ''
   password = ''
-  gmail = ''
-  outlook = ''
-  passGmail = ''
-  passOutlook = ''
+  email = ''
+  passEmail = ''
+  emailRecover = ''
+  pwdEmailRecover = ''
   folder = ''
   isSelected = false
 

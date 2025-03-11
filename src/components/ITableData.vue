@@ -6,8 +6,8 @@
           <th style="width: 50px; min-width: 50px">
             <el-checkbox v-model="checkAll" size="large" />
           </th>
-          <th v-for="item in props.head.filter((x) => x.show == true)" :key="item.name">
-            <div>{{ $t(item.name) }}</div>
+          <th v-for="item in props.head" :key="item.name">
+            <div style="text-transform: capitalize">{{ $t(item.name) }}</div>
           </th>
           <th>
             <div>{{ $t('actionStatus') }}</div>
@@ -247,18 +247,20 @@
       </template>
       <div style="position: relative; height: 50vh; overflow: auto">
         <table>
-          <tr>
-            <td style="min-width: 50px; width: 50px">
-              <el-checkbox v-model="deleteCheckAll" size="large" />
-            </td>
-            <td>{{ $t('title') }}</td>
-          </tr>
-          <tr v-for="item in confirmList" :key="item.title">
-            <td style="min-width: 50px; width: 50px">
-              <el-checkbox v-model="item.isSelected" size="large" />
-            </td>
-            <td>{{ item.title }}</td>
-          </tr>
+          <tbody>
+            <tr>
+              <td style="min-width: 50px; width: 50px">
+                <el-checkbox v-model="deleteCheckAll" size="large" />
+              </td>
+              <td>{{ $t('title') }}</td>
+            </tr>
+            <tr v-for="item in confirmList" :key="item.title">
+              <td style="min-width: 50px; width: 50px">
+                <el-checkbox v-model="item.isSelected" size="large" />
+              </td>
+              <td>{{ item.title }}</td>
+            </tr>
+          </tbody>
         </table>
       </div>
       <template #footer>
@@ -316,12 +318,14 @@ const props = defineProps({
     },
   },
   head: {
-    type: Array,
+    type: Array<{ name: string; value: string }>,
     default: () => {
       return []
     },
   },
 })
+
+console.log(props)
 
 const newFolder = ref('')
 
@@ -498,48 +502,36 @@ const rightActionPosition = ref({
 })
 const configurationList = ref<Array<{ value: string; name: string }>>([
   {
-    value: 'uid',
-    name: 'UID',
+    value: 'name',
+    name: 'name',
+  },
+  {
+    value: 'username',
+    name: 'username',
   },
   {
     value: 'password',
     name: 'password',
   },
   {
-    value: 'privateKey',
-    name: 'Private Key',
+    value: 'email',
+    name: 'email',
+  },
+  {
+    value: 'passEmail',
+    name: 'passEmail',
+  },
+  {
+    value: 'emailRecover',
+    name: 'emailRecover',
+  },
+  {
+    value: 'pwdEmailRecover',
+    name: 'pwdEmailRecover',
   },
   {
     value: 'proxy',
-    name: 'Proxy',
-  },
-  {
-    value: 'cookies',
-    name: 'Cookies',
-  },
-  {
-    value: 'token',
-    name: 'Token',
-  },
-  {
-    value: 'email',
-    name: 'Email',
-  },
-  {
-    value: 'passwordMail',
-    name: 'passwordMail',
-  },
-  {
-    value: 'recoveryMail',
-    name: 'recoveryMail',
-  },
-  {
-    value: 'recoveryMailPassword',
-    name: 'recoveryMailPassword',
-  },
-  {
-    value: 'birthday',
-    name: 'birthday',
+    name: 'proxy',
   },
 ])
 const accountFolderList = ref(store.accountFolderList)
@@ -571,39 +563,39 @@ const checkAll = ref(false)
 const isCopyAction = ref()
 const rightActionRef = ref()
 
-if (proxy.$localSocket) {
-  proxy.$localSocket.on('action-status', (d) => {
-    const i = data.value.findIndex((x) => x.uid == d.uid)
-    if (i != -1)
-      data.value = [
-        ...data.value.slice(0, i),
-        {
-          ...data.value[i],
-          actionStatus: { type: d.type, value: proxy.$t('code.' + d.message) },
-        },
-        ...data.value.slice(i + 1),
-      ]
-  })
-  proxy.$localSocket.on('user-status', (d) => {
-    store.editAccount(d.user)
-    nextTick(() => {
-      const i = data.value.findIndex((x) => x.uid == d.user.uid)
-      if (i != -1)
-        data.value = [
-          ...data.value.slice(0, i),
-          {
-            ...data.value[i],
-            status: d.user.status,
-            actionStatus: {
-              type: d.type,
-              value: proxy.$t('code.' + d.user.status.type),
-            },
-          },
-          ...data.value.slice(i + 1),
-        ]
-    })
-  })
-}
+// if (proxy.$localSocket) {
+//   proxy.$localSocket.on('action-status', (d) => {
+//     const i = data.value.findIndex((x) => x.uid == d.uid)
+//     if (i != -1)
+//       data.value = [
+//         ...data.value.slice(0, i),
+//         {
+//           ...data.value[i],
+//           actionStatus: { type: d.type, value: proxy.$t('code.' + d.message) },
+//         },
+//         ...data.value.slice(i + 1),
+//       ]
+//   })
+//   proxy.$localSocket.on('user-status', (d) => {
+//     store.editAccount(d.user)
+//     nextTick(() => {
+//       const i = data.value.findIndex((x) => x.uid == d.user.uid)
+//       if (i != -1)
+//         data.value = [
+//           ...data.value.slice(0, i),
+//           {
+//             ...data.value[i],
+//             status: d.user.status,
+//             actionStatus: {
+//               type: d.type,
+//               value: proxy.$t('code.' + d.user.status.type),
+//             },
+//           },
+//           ...data.value.slice(i + 1),
+//         ]
+//     })
+//   })
+// }
 
 onMounted(() => {
   const table = document.getElementById('table')
@@ -697,10 +689,10 @@ const clickFeild = (childs, typeActions) => {
   } else if (!childs) {
     switch (typeActions) {
       case 'loginHotmail':
-        proxy.$localSocket.emit('login-hotmail', selectedUserList)
+        // proxy.$localSocket.emit('login-hotmail', selectedUserList)
         break
       case 'loginFacebook':
-        proxy.$localSocket.emit('login-facebook', selectedUserList)
+        // proxy.$localSocket.emit('login-facebook', selectedUserList)
         break
       case 'updateAccountInfo':
         inputData.value = selectedUserList
@@ -721,10 +713,10 @@ const clickFeild = (childs, typeActions) => {
         changeFolderDialog.value = true
         break
       case 'closeAllChorme':
-        proxy.$localSocket.emit('action-close', {
-          type: 'all',
-          uid: selectedUserList.map((x) => x.uid),
-        })
+        // proxy.$localSocket.emit('action-close', {
+        //   type: 'all',
+        //   uid: selectedUserList.map((x) => x.uid),
+        // })
         break
       default:
         break
@@ -757,10 +749,10 @@ const childItemAction = (typeActions, value) => {
 }
 
 function checkAccount(type) {
-  proxy.$localSocket.emit('check-account', {
-    users: [...data.value.filter((x) => x.isSelected)],
-    type,
-  })
+  // proxy.$localSocket.emit('check-account', {
+  //   users: [...data.value.filter((x) => x.isSelected)],
+  //   type,
+  // })
 }
 
 function copy(type) {
@@ -950,10 +942,10 @@ function changeFolder() {
     }
   })
   data.value = newData
-  proxy.$localSocket.emit('change-folder', {
-    type: route.name == 'content-manage' ? 'content' : 'account',
-    data: newData,
-  })
+  // proxy.$localSocket.emit('change-folder', {
+  //   type: route.name == 'content-manage' ? 'content' : 'account',
+  //   data: newData,
+  // })
   proxy.$notification('success', proxy.$t('updateFolderSuccess'))
   changeFolderDialog.value = false
 }

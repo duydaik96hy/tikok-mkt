@@ -13,6 +13,13 @@ function editInfo(type: string, data: any) {
     }
   }
 }
+function isExist(id, listId) {
+  let flag = false
+  listId.forEach((x) => {
+    if (x == id) flag = true
+  })
+  return flag
+}
 
 export const Store = defineStore('setting', () => {
   const userInfo = ref<IUser | null>(null)
@@ -55,6 +62,22 @@ export const Store = defineStore('setting', () => {
     editInfo('baseSetting', baseSetting.value)
   }
 
+  const addAccount = (data: Array<IAccount>) => {
+    data
+      .filter((x) => !!x.id)
+      .forEach((x) => {
+        if (
+          !isExist(
+            x.id,
+            accountList.value.map((a) => a.id),
+          )
+        ) {
+          accountList.value.push(x)
+          editInfo('accountList', accountList.value)
+        }
+      })
+  }
+
   const editAccount = (data) => {
     const index = accountList.value.findIndex((x) => x.id == data.id)
     if (index != -1) {
@@ -92,6 +115,25 @@ export const Store = defineStore('setting', () => {
     editInfo('accountList', accountList.value)
   }
 
+  const addFolder = (data) => {
+    accountFolderList.value.unshift(data)
+    editInfo('accountFolderList', accountFolderList.value)
+  }
+
+  const editFolder = (data, index) => {
+    accountFolderList.value = [
+      ...accountFolderList.value.slice(0, index),
+      data,
+      ...accountFolderList.value.slice(index + 1),
+    ]
+    editInfo('accountFolderList', accountFolderList.value)
+  }
+
+  const deleteFolder = (index) => {
+    accountFolderList.value.splice(index, 1)
+    editInfo('accountFolderList', accountFolderList.value)
+  }
+
   return {
     userInfo,
     token,
@@ -99,6 +141,7 @@ export const Store = defineStore('setting', () => {
     accountList,
     accountFolderList,
     initData,
+    addAccount,
     editUserInfo,
     editToken,
     editBaseSetting,
@@ -106,5 +149,8 @@ export const Store = defineStore('setting', () => {
     editMoreAccount,
     deleteAccount,
     deleteMoreAccount,
+    addFolder,
+    editFolder,
+    deleteFolder,
   }
 })
