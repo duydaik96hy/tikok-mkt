@@ -1,5 +1,4 @@
 import { v4 as idv4 } from 'uuid'
-import { IEmail } from '../userInfomation'
 export class AcountDto {
   id = idv4()
   name = ''

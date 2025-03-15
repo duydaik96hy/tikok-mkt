@@ -4,23 +4,24 @@ import { Store } from '../stores'
 import ITextField from '../components/ITextField.vue'
 import router from '../router'
 import { INotificationType } from '../main'
+
 const store = Store()
 const { proxy } = getCurrentInstance()
 
 const loginInfo = ref({
   username: '',
-  password: '',
+  password: ''
 })
 
 if (store.baseSetting.loginInfo.rememberPwd)
   loginInfo.value = {
     username: store.baseSetting.loginInfo.username,
-    password: store.baseSetting.loginInfo.password,
+    password: store.baseSetting.loginInfo.password
   }
 
 const login = async () => {
   const res = await proxy.$http('post', '/authentications/login', {
-    ...loginInfo.value,
+    ...loginInfo.value
   })
   if (res && res.type && res.type == INotificationType.error) {
     proxy.$notification(INotificationType.error, res.message)
@@ -71,12 +72,12 @@ const login = async () => {
   padding: 5vh 5vw;
   border-radius: 2vw;
   background-color: #f3f6fb;
-  box-shadow:
-    6px 6px 12px #c5c5c5,
-    -6px -6px 12px #ffffff;
+  box-shadow: 6px 6px 12px #c5c5c5,
+  -6px -6px 12px #ffffff;
   border: 1px solid #e8e8e8;
   z-index: 100;
 }
+
 .login-bg {
   position: fixed;
   top: 50%;
@@ -87,6 +88,7 @@ const login = async () => {
   z-index: 1;
   background: url('@/assets/bg.png') top left repeat;
 }
+
 @keyframes show {
   0% {
     opacity: 0;
@@ -110,6 +112,7 @@ const login = async () => {
 .show {
   animation: show 1 0.3s cubic-bezier(0.47, 0, 0.745, 0.715) forwards;
 }
+
 .hide {
   animation: hide 1 0.01s cubic-bezier(0.47, 0, 0.745, 0.715) forwards;
 }
