@@ -26,14 +26,7 @@ export const Store = defineStore('setting', () => {
   const token = ref<string | null>(null)
   const accountList = ref<Array<IAccount>>([])
   const accountFolderList = ref<string[]>([])
-  const baseSetting = ref<IBaseSettings>({
-    btInfo: {
-      ipList: [],
-      link: '',
-      userName: '',
-      password: '',
-    },
-    themeList: [],
+  const baseSetiings = ref<IBaseSettings>({
     loginInfo: {
       username: '',
       password: '',
@@ -44,7 +37,9 @@ export const Store = defineStore('setting', () => {
   const initData = (data: any) => {
     if (data.userInfo) userInfo.value = data.userInfo
     if (data.token) userInfo.value = data.token
-    if (data.baseSetting) userInfo.value = data.baseSetting
+    if (data.accountList) accountList.value = data.accountList
+    if (data.accountFolderList) accountFolderList.value = data.accountFolderList
+    if (data.baseSetiings) baseSetiings.value = data.baseSetiings
   }
 
   const editUserInfo = (user: IUser) => {
@@ -55,11 +50,6 @@ export const Store = defineStore('setting', () => {
   const editToken = (t: string) => {
     token.value = t
     editInfo('token', t)
-  }
-
-  const editBaseSetting = (data: IBaseSettings) => {
-    baseSetting.value = data
-    editInfo('baseSetting', baseSetting.value)
   }
 
   const addAccount = (data: Array<IAccount>) => {
@@ -137,14 +127,13 @@ export const Store = defineStore('setting', () => {
   return {
     userInfo,
     token,
-    baseSetting,
     accountList,
     accountFolderList,
+    baseSetiings,
     initData,
     addAccount,
     editUserInfo,
     editToken,
-    editBaseSetting,
     editAccount,
     editMoreAccount,
     deleteAccount,

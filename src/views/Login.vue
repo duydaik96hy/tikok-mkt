@@ -12,10 +12,10 @@ const loginInfo = ref({
   password: '',
 })
 
-if (store.baseSetting.loginInfo.rememberPwd)
+if (store.baseSetiings.loginInfo.rememberPwd)
   loginInfo.value = {
-    username: store.baseSetting.loginInfo.username,
-    password: store.baseSetting.loginInfo.password,
+    username: store.baseSetiings.loginInfo.username,
+    password: store.baseSetiings.loginInfo.password,
   }
 
 const login = async () => {
@@ -30,7 +30,7 @@ const login = async () => {
     store.editUserInfo(res.data.user)
     store.editToken(res.data.access_token)
     setTimeout(() => {
-      router.replace({ name: 'base-setting' })
+      router.replace({ name: 'account-manage' })
     }, 2000)
   }
 }
@@ -45,7 +45,7 @@ const login = async () => {
           <ITextField :label="$t('pwd')" type="password" v-model="loginInfo.password"></ITextField>
           <div class="f-s-b" style="margin-top: 10px">
             <span class="f-s">
-              <el-checkbox v-model="store.baseSetting.loginInfo.rememberPwd" size="large" />&nbsp;
+              <el-checkbox v-model="store.baseSetiings.loginInfo.rememberPwd" size="large" />&nbsp;
               <span style="transform: translateY(1px)">{{ $t('rememberPwd') }}</span>
             </span>
             <span>{{ $t('forgetPwd') }}</span>

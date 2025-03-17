@@ -16,6 +16,7 @@ export interface IRightClickOption {
   value: string
   name: string
   icon: string
+  showChild: boolean
   childs?: Array<{ name: string; value: string }>
 }
 

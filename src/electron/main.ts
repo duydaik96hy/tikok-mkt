@@ -1,7 +1,8 @@
 import { join, resolve } from 'path'
 import { app, BrowserWindow, ipcMain, screen } from 'electron'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
-import { IBaseSettings, IUser } from './model/baseSetiings'
+import { IAccount, IUser } from './model/userInfomation'
+import { IBaseSettings } from './model/baseSetiings'
 
 const isDev = !app.isPackaged
 const defaultDir = app.isPackaged
@@ -12,20 +13,17 @@ let win: BrowserWindow | null = null
 interface IData {
   userInfo: IUser | null
   token: string
-  baseSetting: IBaseSettings
+  accountList: Array<IAccount>
+  accountFolderList: Array<string>
+  baseSettings: IBaseSettings
 }
 
 let data: IData = {
   userInfo: null,
   token: '',
-  baseSetting: {
-    btInfo: {
-      ipList: [],
-      link: '',
-      userName: '',
-      password: '',
-    },
-    themeList: [],
+  accountList: [],
+  accountFolderList: [],
+  baseSettings: {
     loginInfo: {
       username: '',
       password: '',
@@ -33,7 +31,7 @@ let data: IData = {
     },
   },
 }
-
+//
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: screen.getPrimaryDisplay().workAreaSize.width,
@@ -88,7 +86,7 @@ app.whenReady().then(() => {
     writeFileSync(join(defaultDir, `/config/data.txt`), JSON.stringify(data))
   })
 })
-//s
+//
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()

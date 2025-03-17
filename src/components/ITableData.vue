@@ -19,7 +19,7 @@
           v-for="(item, index) in data"
           :key="item.id"
           @mousedown="mousedown($event, index)"
-          @mouseup="mouseup(index)"
+          @mouseup="mouseup()"
           @mousemove="mousemove(index)"
           @click.right="rightClick($event, index)"
           :class="[
@@ -33,11 +33,7 @@
           <td style="width: 50px; min-width: 50px">
             <el-checkbox v-model="item.isSelected" size="large" />
           </td>
-          <td
-            v-for="h in props.head.filter((x) => x.show == true)"
-            :key="h.name"
-            @dblclick="$copy(item[h.value])"
-          >
+          <td v-for="h in props.head" :key="h.name" @dblclick="$copy(item[h.value])">
             <span v-if="h.value == 'status' && item.status">{{
               item.status.status ? $t('active') : $t('code.' + item.status.type)
             }}</span>
@@ -324,9 +320,6 @@ const props = defineProps({
     },
   },
 })
-
-console.log(props)
-
 const newFolder = ref('')
 
 const deleteContentDialog = ref(false)
@@ -338,6 +331,7 @@ const rightActionList = ref<Array<IRightClickOption>>([
     value: 'select',
     name: 'select',
     icon: 'selected',
+    showChild: false,
     childs: [
       {
         value: 'all',
@@ -347,55 +341,41 @@ const rightActionList = ref<Array<IRightClickOption>>([
         value: 'blueField',
         name: 'blueField',
       },
-      {
-        value: 'active',
-        name: 'active',
-      },
-      {
-        value: 'disabled',
-        name: 'disabled',
-      },
     ],
   },
   {
     value: 'copy',
     name: 'copy',
     icon: 'copy',
+    showChild: false,
     childs: [
       {
-        value: 'uid',
-        name: 'UID',
+        value: 'name',
+        name: 'name',
       },
       {
         value: 'password',
         name: 'password',
       },
-      {
-        value: 'token',
-        name: 'Token',
-      },
-      {
-        value: 'copy2FA',
-        name: 'copy2FA',
-      },
-      {
-        value: 'uid-password-privateKey',
-        name: 'uidPassPrivateKey',
-      },
-      {
-        value: 'email-passwordMail',
-        name: 'emailPassMail',
-      },
-      {
-        value: 'copyWithCustomsConfiguration',
-        name: 'copyWithCustomsConfiguration',
-      },
+      // {
+      //   value: 'uid-password-privateKey',
+      //   name: 'uidPassPrivateKey',
+      // },
+      // {
+      //   value: 'email-passwordMail',
+      //   name: 'emailPassMail',
+      // },
+      // {
+      //   value: 'copyWithCustomsConfiguration',
+      //   name: 'copyWithCustomsConfiguration',
+      // },
     ],
   },
   {
     value: 'paste',
     name: 'paste',
     icon: 'paste',
+    showChild: false,
     childs: [
       {
         value: 'proxy',
@@ -405,28 +385,25 @@ const rightActionList = ref<Array<IRightClickOption>>([
         value: 'recoveryMail',
         name: 'pasteRecoveryMail',
       },
-      {
-        value: 'password',
-        name: 'pastePassword',
-      },
-      {
-        value: 'cookies',
-        name: 'pasteCookies',
-      },
-      {
-        value: 'pasteWithCustomsConfiguration',
-        name: 'pasteWithCustomsConfiguration',
-      },
+      // {
+      //   value: 'password',
+      //   name: 'pastePassword',
+      // },
+      // {
+      //   value: 'cookies',
+      //   name: 'pasteCookies',
+      // },
+      // {
+      //   value: 'pasteWithCustomsConfiguration',
+      //   name: 'pasteWithCustomsConfiguration',
+      // },
     ],
   },
   {
     value: 'delete',
     name: 'delete',
     icon: 'delete',
-    childsSize: {
-      width: 220,
-      height: 135,
-    },
+    showChild: false,
     childs: [
       {
         value: 'account',
@@ -436,64 +413,53 @@ const rightActionList = ref<Array<IRightClickOption>>([
         value: 'proxy',
         name: 'deleteProxy',
       },
-      {
-        value: 'cookies',
-        name: 'deleteCookies',
-      },
-      {
-        value: 'token',
-        name: 'deleteToken',
-      },
-      {
-        value: 'recoveryMail',
-        name: 'deleteRecoveryMail',
-      },
     ],
   },
   {
-    value: 'loginFacebook',
-    name: 'loginFacebook',
+    value: 'loginMail',
+    name: 'loginMail',
     icon: 'facebook',
+    showChild: false,
   },
-  {
-    value: 'loginHotmail',
-    name: 'loginHotmail',
-    icon: 'hotmail',
-  },
-  {
-    value: 'checkAccount',
-    name: 'checkAccount',
-    icon: 'check',
-    childs: [
-      {
-        value: 'flashCheck',
-        name: 'flashCheck',
-      },
-      {
-        value: 'specialCheck',
-        name: 'specialCheck',
-      },
-    ],
-  },
+  // {
+  //   value: 'checkAccount',
+  //   name: 'checkAccount',
+  //   icon: 'check',
+  //   showChild: false,
+  //   childs: [
+  //     {
+  //       value: 'flashCheck',
+  //       name: 'flashCheck',
+  //     },
+  //     {
+  //       value: 'specialCheck',
+  //       name: 'specialCheck',
+  //     },
+  //   ],
+  // },
   {
     value: 'updateAccountInfo',
     name: 'updateAccountInfo',
     icon: 'update-info',
+    showChild: false,
   },
   {
     value: 'createChormeProfile',
     name: 'createChormeProfile',
     icon: 'chorme',
+    showChild: false,
   },
   {
     value: 'changeFolder',
     name: 'changeFolder',
     icon: 'change-folder',
+    showChild: false,
   },
   {
     value: 'closeAllChorme',
     name: 'closeAllChorme',
     icon: 'quit',
+    showChild: false,
   },
 ])
 const rightActionPosition = ref({
@@ -959,6 +925,7 @@ watch(checkAll, (n) => {
 })
 
 watch(props, (n) => {
+  console.log(n)
   data.value = n.list
 })
 
