@@ -1,8 +1,10 @@
 import { join, resolve } from 'path'
 import { app, BrowserWindow, ipcMain, screen } from 'electron'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
-import { IAccount, IUser } from './model/userInfomation'
+import { IAccount } from './model/userInfomation'
 import { IBaseSettings } from './model/baseSetiings'
+import { IUser } from './model/userInfomation'
+import { registerCronJob } from './cron'
 
 const isDev = !app.isPackaged
 const defaultDir = app.isPackaged
@@ -72,6 +74,7 @@ if (!existsSync(join(defaultDir, 'chrome'))) {
 }
 
 app.whenReady().then(() => {
+  console.log('running')
   win = createWindow()
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
@@ -85,6 +88,7 @@ app.whenReady().then(() => {
     data[info.type as keyof IData] = JSON.parse(info.data)
     writeFileSync(join(defaultDir, `/config/data.txt`), JSON.stringify(data))
   })
+  registerCronJob()
 })
 //
 app.on('window-all-closed', () => {

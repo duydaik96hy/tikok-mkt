@@ -4,6 +4,7 @@ import { Store } from '../stores'
 import ITextField from '../components/ITextField.vue'
 import router from '../router'
 import { INotificationType } from '../main'
+
 const store = Store()
 const { proxy } = getCurrentInstance()
 
@@ -77,6 +78,7 @@ const login = async () => {
   border: 1px solid #e8e8e8;
   z-index: 100;
 }
+
 .login-bg {
   position: fixed;
   top: 50%;
@@ -87,6 +89,7 @@ const login = async () => {
   z-index: 1;
   background: url('@/assets/bg.png') top left repeat;
 }
+
 @keyframes show {
   0% {
     opacity: 0;
@@ -110,6 +113,7 @@ const login = async () => {
 .show {
   animation: show 1 0.3s cubic-bezier(0.47, 0, 0.745, 0.715) forwards;
 }
+
 .hide {
   animation: hide 1 0.01s cubic-bezier(0.47, 0, 0.745, 0.715) forwards;
 }
