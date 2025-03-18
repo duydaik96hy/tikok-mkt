@@ -88,7 +88,7 @@ app.whenReady().then(() => {
     data[info.type as keyof IData] = JSON.parse(info.data)
     writeFileSync(join(defaultDir, `/config/data.txt`), JSON.stringify(data))
   })
-  registerCronJob()
+  // registerCronJob()
 })
 //
 app.on('window-all-closed', () => {
