@@ -10,18 +10,18 @@ const { proxy } = getCurrentInstance()
 
 const loginInfo = ref({
   username: '',
-  password: ''
+  password: '',
 })
 
-if (store.baseSetting.loginInfo.rememberPwd)
+if (store.baseSetiings.loginInfo.rememberPwd)
   loginInfo.value = {
-    username: store.baseSetting.loginInfo.username,
-    password: store.baseSetting.loginInfo.password
+    username: store.baseSetiings.loginInfo.username,
+    password: store.baseSetiings.loginInfo.password,
   }
 
 const login = async () => {
   const res = await proxy.$http('post', '/authentications/login', {
-    ...loginInfo.value
+    ...loginInfo.value,
   })
   if (res && res.type && res.type == INotificationType.error) {
     proxy.$notification(INotificationType.error, res.message)
@@ -31,7 +31,7 @@ const login = async () => {
     store.editUserInfo(res.data.user)
     store.editToken(res.data.access_token)
     setTimeout(() => {
-      router.replace({ name: 'base-setting' })
+      router.replace({ name: 'account-manage' })
     }, 2000)
   }
 }
@@ -46,7 +46,7 @@ const login = async () => {
           <ITextField :label="$t('pwd')" type="password" v-model="loginInfo.password"></ITextField>
           <div class="f-s-b" style="margin-top: 10px">
             <span class="f-s">
-              <el-checkbox v-model="store.baseSetting.loginInfo.rememberPwd" size="large" />&nbsp;
+              <el-checkbox v-model="store.baseSetiings.loginInfo.rememberPwd" size="large" />&nbsp;
               <span style="transform: translateY(1px)">{{ $t('rememberPwd') }}</span>
             </span>
             <span>{{ $t('forgetPwd') }}</span>
@@ -72,8 +72,9 @@ const login = async () => {
   padding: 5vh 5vw;
   border-radius: 2vw;
   background-color: #f3f6fb;
-  box-shadow: 6px 6px 12px #c5c5c5,
-  -6px -6px 12px #ffffff;
+  box-shadow:
+    6px 6px 12px #c5c5c5,
+    -6px -6px 12px #ffffff;
   border: 1px solid #e8e8e8;
   z-index: 100;
 }

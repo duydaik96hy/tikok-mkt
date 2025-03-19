@@ -10,13 +10,6 @@ export enum IApiUrl {
 }
 
 export interface IBaseSettings {
-  btInfo: {
-    link: string
-    userName: string
-    password: string
-    ipList: Array<Array<string>>
-  }
-  themeList: Array<string>
   loginInfo: {
     username: string
     password: string

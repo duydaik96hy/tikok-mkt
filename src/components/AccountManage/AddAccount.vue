@@ -177,7 +177,7 @@ const list = ref<Array<IAccount>>([])
 const addNewAccount = () => {
   store.addAccount(
     list.value.map((x) => {
-      return { ...x, status: { status: true }, loginFacebook: false }
+      return { ...x, status: { status: true }, loginEmail: false }
     }),
   )
   proxy?.$notification('success', proxy.$t('addAccountSuccess'))
