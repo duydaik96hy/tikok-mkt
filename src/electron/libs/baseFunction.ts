@@ -12,7 +12,7 @@ export const timeout = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export async function lauch(
+export async function launch(
   user: IAccount,
   headless: boolean,
   position: string,
@@ -35,7 +35,7 @@ export async function lauch(
 
   const params = {
     headless,
-    executablePath: join(userDataDir, 'chrome.exe'),
+    // executablePath: join(userDataDir, 'chrome.exe'),
     defaultViewport: {
       width: 1400,
       height: 900,

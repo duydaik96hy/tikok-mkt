@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import { IAccount } from '../model/userInfomation'
-import { lauch, timeout } from './baseFunction'
+import { launch, timeout } from './baseFunction'
 import { parentPort } from 'worker_threads'
 
 const stealthPlugin = StealthPlugin()
@@ -18,10 +18,11 @@ export async function loginGmail(
     const user = listUser[index]
     const pX = (index % 5) * 360
     const pY = (Math.floor(index / 5) % 3) * 360
-    userLoginGmail(user, headless, `--window-position=${pX},${pY}`, userDataDir)
+    await userLoginGmail(user, headless, `--window-position=${pX},${pY}`, userDataDir)
     await timeout(2000)
   }
 }
+
 
 export async function loginOutlook(
   listUser: Array<IAccount>,
@@ -45,7 +46,7 @@ async function userLoginGmail(
 ) {
   try {
     const loginUrl = 'https://workspace.google.com/intl/en-US/gmail/'
-    const browser = await lauch(user, headless, position, userDataDir)
+    const browser = await launch(user, headless, position, userDataDir)
     const page = await browser.newPage()
     await page.goto(loginUrl, {
       waitUntil: 'networkidle2',
@@ -114,7 +115,7 @@ async function userLoginOutLook(
   position: string,
   userDataDir: string,
 ) {
-  const browser = await lauch(user, headless, position, userDataDir)
+  const browser = await launch(user, headless, position, userDataDir)
   let page = await browser.newPage()
   try {
     if (parentPort) {
