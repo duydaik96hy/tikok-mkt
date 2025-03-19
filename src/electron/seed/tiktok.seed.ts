@@ -2,6 +2,7 @@ import puppeteer from 'puppeteer-extra'
 
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import { timeout } from '../libs/baseFunction'
+import axios from 'axios'
 
 const stealthPlugin = StealthPlugin()
 stealthPlugin.enabledEvasions.delete('iframe.contentWindow')
@@ -25,7 +26,7 @@ export async function loginTikTok(
 ) {
   const browser = await puppeteer.launch({
     headless: false,
-    userDataDir: process.cwd() + '/public/' + username
+    userDataDir: process.cwd() + '/public/' + username+"10"
   })
   const page = await browser.newPage()
   await page.goto('https://www.tiktok.com/login')
@@ -62,10 +63,10 @@ export async function launchTikTok(username: string): Promise<void> {
   })
   const page = await browser.newPage()
   await page.goto('https://www.tiktok.com')
-  await timeout(1000);
-  let numberReload =1;
+  await timeout(1000)
+  let numberReload = 1
   while (true) {
-    await page.reload();
+    await page.reload()
     numberReload++
     await page.waitForSelector('span[data-e2e="like-icon"]', { visible: true, timeout: 10000 })
     for (let i = 0; i < 4; i++) {
@@ -82,9 +83,17 @@ export async function launchTikTok(username: string): Promise<void> {
           visible: true,
           timeout: 10000
         })
+        const title = await page.evaluate(() => {
+          const titleElement = document.querySelector('div[data-e2e="browse-video-desc"]')
+          return titleElement ? (titleElement as any).innerText.trim() : 'Không tìm thấy title!'
+        })
+        let commentData = 'Hello!'
+        if (title) {
+          commentData = await generateComment(title)
+        }
         if (commentInput) {
           await commentInput.click()
-          await commentInput.type(':D!', { delay: 100 })// todo: call api to fetch ai comment
+          await commentInput.type(commentData, { delay: 100 })
           await timeout(2000)
           const postButton = await page.waitForSelector('div[data-e2e="comment-post"]', { visible: true })
           if (postButton) {
@@ -97,19 +106,22 @@ export async function launchTikTok(username: string): Promise<void> {
       await quitButton[0].click()
       await timeout(1000)
       await page.keyboard.press('ArrowDown')
-      await timeout(2000);
+      await timeout(2000)
     }
-    await timeout(1000);
+    await timeout(1000)
     if (numberReload >= 10) {
       break
     }
   }
 }
 
-export async function comment(): Promise<void> {
-
-}
-
-export async function surf(): Promise<void> {
-
+async function generateComment(title: string): Promise<string> {
+  const response = await axios.post('http://155.159.255.140:3000/api/common/comment/generate', {
+    title: title
+  },{
+    headers: {
+      "internal-api-key": "123123" // todo: imp this
+    }
+  })
+  return response.data?.data
 }
