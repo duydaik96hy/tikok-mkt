@@ -79,4 +79,8 @@ export default {
   active: '',
   blueField: 'Bôi xanh',
   loginMail: 'Đăng nhập Email',
+  BuffFollow: 'Tăng Follows',
+  SeedingVideos: 'Seeding Videos',
+  start: 'Bắt đầu',
+  stop: 'Dừng',
 }

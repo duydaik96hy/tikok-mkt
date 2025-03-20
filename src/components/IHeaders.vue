@@ -37,12 +37,21 @@
         <h1 style="border-bottom: 1px solid #f06305; padding: 10px">{{ props.title }}</h1>
       </template>
       <template #default>
-        <!-- <div v-if="props.type == 0">
-          <ViralMarketing />
-        </div> -->
-        <div v-if="props.type == 1" class="main-bg">
-          <BaseInteractive />
-        </div>
+        <ul v-if="props.type == 1">
+          <li v-for="(item, index) in props.list" :key="item.value" @click="change(item)">
+            <div class="f-s">
+              <EleIcon :size="27" :icon="item.icon"></EleIcon> &nbsp; {{ $t(item.name) }}
+            </div>
+            <div class="child" :class="`${activeNav == index ? 'show-nav' : 'hide-nav'}`">
+              <div v-if="item.type == 0" class="add-folder">
+                <SeedingVideos />
+              </div>
+              <div v-if="item.type == 1">
+                <BuffFollow />
+              </div>
+            </div>
+          </li>
+        </ul>
         <ul v-if="props.type == 2">
           <li v-for="(item, index) in props.list" :key="item.value" @click="change(item)">
             <div class="f-s">
@@ -54,66 +63,6 @@
               </div>
               <div v-if="item.type == 1">
                 <AddAccount />
-              </div>
-              <div v-if="item.type == 2">
-                <SelectShowCol />
-              </div>
-            </div>
-          </li>
-        </ul>
-        <ul v-if="props.type == 3">
-          <li v-for="(item, index) in props.list" :key="item.value" @click="change(item)">
-            <div class="f-s">
-              <EleIcon :size="27" :icon="item.icon"></EleIcon> &nbsp; {{ $t(item.name) }}
-            </div>
-            <div class="child" :class="`${activeNav == index ? 'show-nav' : 'hide-nav'}`">
-              <div v-if="item.type == 0" class="add-folder">
-                <PostsFolderManage />
-              </div>
-              <div v-if="item.type == 1">
-                <AddPosts />
-              </div>
-            </div>
-          </li>
-        </ul>
-        <ul v-if="props.type == 4">
-          <li v-for="(item, index) in props.list" :key="item.value" @click="change(item)">
-            <div class="f-s">
-              <EleIcon :size="27" :icon="item.icon"></EleIcon> &nbsp; {{ $t(item.name) }}
-            </div>
-            <div class="child" :class="`${activeNav == index ? 'show-nav' : 'hide-nav'}`">
-              <div v-if="item.type == 0" class="add-folder">
-                <UAccount :data="item" />
-              </div>
-              <div v-if="item.type == 1">
-                <UCheckpoint :data="item" />
-              </div>
-              <div v-if="item.type == 2">
-                <UnclockEmail :data="item" />
-              </div>
-            </div>
-          </li>
-        </ul>
-        <ul v-if="props.type == 5">
-          <li v-for="(item, index) in props.list" :key="item.value" @click="change(item)">
-            <div class="f-s">
-              <EleIcon :size="27" :icon="item.icon"></EleIcon> &nbsp; {{ $t(item.name) }}
-            </div>
-            <div class="child" :class="`${activeNav == index ? 'show-nav' : 'hide-nav'}`">
-              <div v-if="item.type == 0">
-                <BaseInfo :data="item" />
-              </div>
-              <div v-if="item.type == 1">
-                <AdvancedInfo :data="item" />
-              </div>
-              <div v-if="item.type == 2">
-                <WithUID :data="item" />
-              </div>
-              <div v-if="item.type == 3">
-                <DeleteInfo :data="item" />
-              </div>
-              <div v-if="item.type == 4">
-                <Update2FA :data="item" />
               </div>
             </div>
           </li>
@@ -127,6 +76,8 @@ import AccountFolderManage from './AccountManage/AccountFolderManage.vue'
 import AddAccount from './AccountManage/AddAccount.vue'
 import EleIcon from './icons/EleIcon.vue'
 import { ref } from 'vue'
+import SeedingVideos from './Seedings/SeedingVideos.vue'
+import BuffFollow from './Seedings/BuffFollow.vue'
 
 const emit = defineEmits(['change'])
 

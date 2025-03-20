@@ -15,4 +15,8 @@ export interface IBaseSettings {
     password: string
     rememberPwd: boolean
   }
+  seedings: {
+    buffFollow: string
+    seedingVideos: string
+  }
 }

@@ -22,6 +22,20 @@ const head = ref([
 const showSelect = ref(false)
 const hideSelect = ref(false)
 const selectedFolder = ref('')
+const menuList = [
+  {
+    name: 'BuffFollow',
+    value: 0,
+    icon: `BuffFollow`,
+    type: 0,
+  },
+  {
+    name: 'SeedingVideos',
+    value: 1,
+    icon: `SeedingVideos`,
+    type: 1,
+  },
+]
 // proxy.$localSocket.on('selected-folder', (data) => {
 //   list.value = data
 // })
@@ -35,7 +49,7 @@ const changeFolder = (e, val) => {
 <template>
   <div class="full interactive" @click="hideSelect = !hideSelect">
     <div>
-      <IHeaders :list="[]" :title="$t('configuration')" :type="1"></IHeaders>
+      <IHeaders :list="menuList" :title="$t('Seedings')" :type="1"></IHeaders>
       <div class="f-s">
         <span>
           <IconRefresh></IconRefresh>
