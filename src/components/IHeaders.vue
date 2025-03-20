@@ -43,10 +43,10 @@
               <EleIcon :size="27" :icon="item.icon"></EleIcon> &nbsp; {{ $t(item.name) }}
             </div>
             <div class="child" :class="`${activeNav == index ? 'show-nav' : 'hide-nav'}`">
-              <div v-if="item.type == 0" class="add-folder">
+              <div v-if="item.type == 1" class="add-folder">
                 <SeedingVideos />
               </div>
-              <div v-if="item.type == 1">
+              <div v-if="item.type == 0">
                 <BuffFollow />
               </div>
             </div>
