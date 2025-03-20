@@ -29,3 +29,4 @@ public
 *.sw?
 
 *.tsbuildinfo
+/src/electron/data/
