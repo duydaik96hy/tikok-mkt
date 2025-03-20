@@ -26,7 +26,7 @@ export async function loginTikTok(
 ) {
   const browser = await puppeteer.launch({
     headless: false,
-    userDataDir: process.cwd() + '/public/' + username+"10"
+    userDataDir: process.cwd() + '/src/electron/data/browser-data/' + username
   })
   const page = await browser.newPage()
   await page.goto('https://www.tiktok.com/login')
@@ -56,71 +56,63 @@ export async function loginTikTok(
 
 }
 
-export async function launchTikTok(username: string): Promise<void> {
+export async function launchTikTok(username: string, videoUrl: string = '@dinhcaoeq/video/7482429304937123090', watchVideoSecond: number[]): Promise<void> {
   const browser = await puppeteer.launch({
     headless: false,
-    userDataDir: process.cwd() + '/public/' + username
+    userDataDir: process.cwd() + '/src/electron/data/browser-data/' + username
   })
   const page = await browser.newPage()
-  await page.goto('https://www.tiktok.com')
-  await timeout(1000)
-  let numberReload = 1
-  while (true) {
-    await page.reload()
-    numberReload++
-    await page.waitForSelector('span[data-e2e="like-icon"]', { visible: true, timeout: 10000 })
-    for (let i = 0; i < 4; i++) {
-      const likeButtons = await page.$$('span[data-e2e="like-icon"]')
-      if (likeButtons.length) {
-        await likeButtons[i].click()
-      }
-      await timeout(1000)
-      const commentButtons = await page.$$('span[data-e2e="comment-icon"]')
-      if (commentButtons.length) {
-        await commentButtons[i].click()
-        await timeout(1000)
-        const commentInput = await page.waitForSelector('div[data-e2e="comment-text"]', {
-          visible: true,
-          timeout: 10000
-        })
-        const title = await page.evaluate(() => {
-          const titleElement = document.querySelector('div[data-e2e="browse-video-desc"]')
-          return titleElement ? (titleElement as any).innerText.trim() : 'Không tìm thấy title!'
-        })
-        let commentData = 'Hello!'
-        if (title) {
-          commentData = await generateComment(title)
-        }
-        if (commentInput) {
-          await commentInput.click()
-          await commentInput.type(commentData, { delay: 100 })
-          await timeout(2000)
-          const postButton = await page.waitForSelector('div[data-e2e="comment-post"]', { visible: true })
-          if (postButton) {
-            await postButton.click()
-          }
-        }
-      }
-      await timeout(3000)
-      const quitButton = await page.$$('button[data-e2e="browse-close"]')
-      await quitButton[0].click()
-      await timeout(1000)
-      await page.keyboard.press('ArrowDown')
-      await timeout(2000)
+  await page.goto('https://www.tiktok.com/' + videoUrl)
+  const timeToWatch=  Math.floor(Math.random() * (watchVideoSecond[1] - watchVideoSecond[0] + 1)) + watchVideoSecond[0];
+  await timeout(timeToWatch*1000);
+  await page.waitForSelector('span[data-e2e="like-icon"]', { visible: true, timeout: 10000 })
+  for (let i = 0; i < 4; i++) {
+    const likeButtons = await page.$$('span[data-e2e="like-icon"]')
+    if (likeButtons.length) {
+      await likeButtons[i].click()
     }
     await timeout(1000)
-    if (numberReload >= 10) {
-      break
+    const commentButtons = await page.$$('span[data-e2e="comment-icon"]')
+    if (commentButtons.length) {
+      await commentButtons[i].click()
+      await timeout(1000)
+      const commentInput = await page.waitForSelector('div[data-e2e="comment-text"]', {
+        visible: true,
+        timeout: 10000
+      })
+      const title = await page.evaluate(() => {
+        const titleElement = document.querySelector('div[data-e2e="browse-video-desc"]')
+        return titleElement ? (titleElement as any).innerText.trim() : 'Không tìm thấy title!'
+      })
+      let commentData = 'Hello!'
+      if (title) {
+        commentData = await generateComment(title)
+      }
+      if (commentInput) {
+        await commentInput.click()
+        await commentInput.type(commentData, { delay: 100 })
+        await timeout(2000)
+        const postButton = await page.waitForSelector('div[data-e2e="comment-post"]', { visible: true })
+        if (postButton) {
+          await postButton.click();
+        }
+      }
     }
+    await timeout(3000)
+    const quitButton = await page.$$('button[data-e2e="browse-close"]')
+    await quitButton[0].click()
+    await timeout(1000)
+    await page.keyboard.press('ArrowDown')
+    await timeout(2000);
   }
 }
 
 async function generateComment(title: string): Promise<string> {
   const response = await axios.post('http://155.159.255.140:3000/api/common/comment/generate', {
     title: title
-  },{
+  }, {
     headers: {
-      "internal-api-key": "123123" // todo: imp this
+      'internal-api-key': '123123' // todo: imp this
     }
   })
   return response.data?.data

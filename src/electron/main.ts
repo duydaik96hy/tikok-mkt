@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { IAccount } from './model/userInfomation'
 import { IBaseSettings } from './model/baseSetiings'
 import { IUser } from './model/userInfomation'
-import { loginTikTok } from './seed/tiktok.seed'
+import { launchTikTok, loginTikTok } from './seed/tiktok.seed'
 
 const isDev = !app.isPackaged
 const defaultDir = app.isPackaged
@@ -93,7 +93,7 @@ app.whenReady().then(() => {
     data[info.type as keyof IData] = JSON.parse(info.data)
     writeFileSync(join(defaultDir, `/config/data.txt`), JSON.stringify(data))
   })
-  // loginTikTok('thangthuy723', 'DieuThuy1108@').then()
+  launchTikTok('thangthuy723').then()
 })
 //
 app.on('window-all-closed', () => {
