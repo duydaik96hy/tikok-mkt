@@ -56,13 +56,13 @@ export async function loginTikTok(
 
 }
 
-export async function launchTikTok(username: string, videoUrl: string, watchVideoSecond: number[]): Promise<void> {
+export async function launchTikTok(username: string, videoPath: string, watchVideoSecond: number[], title: string): Promise<void> {
   const browser = await puppeteer.launch({
     headless: false,
     userDataDir: process.cwd() + '/src/electron/data/browser-data/' + username
   })
   const page = await browser.newPage()
-  await page.goto('https://www.tiktok.com/' + videoUrl)
+  await page.goto('https://www.tiktok.com/' + videoPath)
   const timeToWatch=  Math.floor(Math.random() * (watchVideoSecond[1] - watchVideoSecond[0] + 1)) + watchVideoSecond[0];
   await timeout(timeToWatch*1000);
   await page.waitForSelector('span[data-e2e="like-icon"]', { visible: true, timeout: 10000 })
@@ -79,10 +79,6 @@ export async function launchTikTok(username: string, videoUrl: string, watchVide
       const commentInput = await page.waitForSelector('div[data-e2e="comment-text"]', {
         visible: true,
         timeout: 10000
-      })
-      const title = await page.evaluate(() => {
-        const titleElement = document.querySelector('div[data-e2e="browse-video-desc"]')
-        return titleElement ? (titleElement as any).innerText.trim() : 'Không tìm thấy title!'
       })
       let commentData = 'Hello!'
       if (title) {

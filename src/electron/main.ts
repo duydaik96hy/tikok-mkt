@@ -93,7 +93,7 @@ app.whenReady().then(() => {
     data[info.type as keyof IData] = JSON.parse(info.data)
     writeFileSync(join(defaultDir, `/config/data.txt`), JSON.stringify(data))
   })
-  // launchTikTok('thangthuy723').then()
+  // loginTikTok('thangthuy723','DieuThuy1108@').then()
 })
 //
 app.on('window-all-closed', () => {
