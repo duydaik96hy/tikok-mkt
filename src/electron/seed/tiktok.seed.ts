@@ -56,7 +56,7 @@ export async function loginTikTok(
 
 }
 
-export async function launchTikTok(username: string, videoUrl: string = '@dinhcaoeq/video/7482429304937123090', watchVideoSecond: number[]): Promise<void> {
+export async function launchTikTok(username: string, videoUrl: string, watchVideoSecond: number[]): Promise<void> {
   const browser = await puppeteer.launch({
     headless: false,
     userDataDir: process.cwd() + '/src/electron/data/browser-data/' + username
