@@ -1,8 +1,9 @@
 import puppeteer from 'puppeteer-extra'
 
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
-import { timeout } from '../libs/baseFunction'
+import { launch, timeout } from '../libs/baseFunction'
 import axios from 'axios'
+import { IAccount } from '../model/userInfomation'
 
 const stealthPlugin = StealthPlugin()
 stealthPlugin.enabledEvasions.delete('iframe.contentWindow')
@@ -56,15 +57,15 @@ export async function loginTikTok(
 
 }
 
-export async function launchTikTok(username: string, videoPath: string, watchVideoSecond: number[], title: string): Promise<void> {
-  const browser = await puppeteer.launch({
-    headless: false,
-    userDataDir: process.cwd() + '/src/electron/data/browser-data/' + username
-  })
+export async function userSeedingVideo(user: IAccount, videoPath: string, headless: boolean, watchVideoTime: number[], description: string, userDataDir: string, position: string): Promise<void> {
+  if (!videoPath.startsWith('https://www.tiktok.com/')) {
+    return
+  }
+  const browser = await launch(user, headless, position, userDataDir)
   const page = await browser.newPage()
-  await page.goto('https://www.tiktok.com/' + videoPath)
-  const timeToWatch=  Math.floor(Math.random() * (watchVideoSecond[1] - watchVideoSecond[0] + 1)) + watchVideoSecond[0];
-  await timeout(timeToWatch*1000);
+  await page.goto(videoPath)
+  const timeToWatch = Math.floor(Math.random() * (watchVideoTime[1] - watchVideoTime[0] + 1)) + watchVideoTime[0]
+  await timeout(timeToWatch * 1000)
   await page.waitForSelector('span[data-e2e="like-icon"]', { visible: true, timeout: 10000 })
   for (let i = 0; i < 4; i++) {
     const likeButtons = await page.$$('span[data-e2e="like-icon"]')
@@ -81,7 +82,13 @@ export async function launchTikTok(username: string, videoPath: string, watchVid
         timeout: 10000
       })
       let commentData = 'Hello!'
-      if (title) {
+      const title = await page.evaluate(() => {
+        const titleElement = document.querySelector('div[data-e2e="browse-video-desc"]')
+        return titleElement ? (titleElement as any).innerText.trim() : 'Không tìm thấy title!'
+      })
+      if (description) {
+        commentData = await generateComment(description)
+      } else {
         commentData = await generateComment(title)
       }
       if (commentInput) {
@@ -90,7 +97,7 @@ export async function launchTikTok(username: string, videoPath: string, watchVid
         await timeout(2000)
         const postButton = await page.waitForSelector('div[data-e2e="comment-post"]', { visible: true })
         if (postButton) {
-          await postButton.click();
+          await postButton.click()
         }
       }
     }
@@ -99,7 +106,73 @@ export async function launchTikTok(username: string, videoPath: string, watchVid
     await quitButton[0].click()
     await timeout(1000)
     await page.keyboard.press('ArrowDown')
-    await timeout(2000);
+    await timeout(2000)
+  }
+  await page.close()
+  await browser.close();
+}
+
+async function followTiktok(user: IAccount, account_id: string, headless: boolean, watchVideoTime: number[], userDataDir: string, position: string){
+  const browser = await launch(user, headless, position, userDataDir)
+  const page = await browser.newPage()
+  await page.goto('https://www.tiktok.com/'+account_id)
+  await timeout(2000)
+  const timeToWatch = Math.floor(Math.random() * (watchVideoTime[1] - watchVideoTime[0] + 1)) + watchVideoTime[0]
+  const videos = await page.$$('div[data-e2e="user-post-item"]')
+  if (videos.length) {
+    const length = Math.min(videos.length, 2)
+    for (let i = 0; i < length; i++) {
+      await videos[i].click();
+      await timeout(timeToWatch)
+      const likeButtons = await page.$$('span[data-e2e="browse-like-icon"]')
+      if (likeButtons.length) {
+        await likeButtons[0].click()
+      }
+      await timeout(2000)
+      const quitButton = await page.$$('button[data-e2e="browse-close"]');
+      if(quitButton.length){
+        await quitButton[0].click()
+      }
+      await timeout(1000)
+    }
+  }
+  await timeout(2000)
+  const followButtons = await page.$$('button[data-e2e="follow-button"]');
+  if (followButtons.length) {
+    await followButtons[0].click();
+  }
+  await page.close()
+  await browser.close();
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function seedingVideo(users: IAccount[], userDataDir: string, data: any, videoPath: string, headless: boolean) {
+  const length = users.length / data.numberOfStreams
+  const listPath = videoPath.split('\n').filter(i => i)
+  let pathIndex = 0
+  for (let i = 0; i < length; i++) {
+    await Promise.all(
+      Array.from({ length: data.configuration.numberOfStreams }).map(async (j, k) => {
+        pathIndex = i * data.configuration.numberOfStreams + k
+        const userIndex = i * data.configuration.numberOfStreams + k
+        if (!listPath[pathIndex]) {
+          pathIndex = 0
+        }
+        const subPath = listPath[pathIndex].split('|')
+        const pX = (k % 5) * 360
+        const pY = (Math.floor(k / 5) % 3) * 360
+        return await userSeedingVideo(
+          data.users[userIndex],
+          subPath[0],
+          headless,
+          data.watchVideoTime,
+          subPath[1],
+          userDataDir,
+          `--window-position=${pX},${pY}`
+        )
+      })
+    )
+
   }
 }
 

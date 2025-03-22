@@ -17,6 +17,10 @@ export interface IBaseSettings {
   }
   seedings: {
     buffFollow: string
-    seedingVideos: string
+    seedingVideos: {
+      numberOfStreams: number,
+      idLists: string,
+      watchVideoTime: number[],
+    }
   }
 }
