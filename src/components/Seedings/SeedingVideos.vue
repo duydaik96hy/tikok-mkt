@@ -48,28 +48,32 @@ import { Store } from '../../stores'
 const store = Store()
 const { proxy } = getCurrentInstance()
 const configuration = ref(store.baseSetiings.seedings.seedingVideos)
-const running = ref()
+const running = ref(false)
 
 const startActive = () => {
-  // if (!configuration.value.script) {
-  //   proxy.$notification('error', proxy.$t('selectScriptPlease'))
-  // } else {
-  //   configuration.value.running = true
-  //   const selectedUser = accountStore.accountList.filter((x) => x.status)
-  //   proxy.$localSocket.emit('start-interactive', {
-  //     configuration: configuration.value,
-  //     users: selectedUser
-  //   })
-  // }
+  running.value = true
+  if (window) {
+    const win = window as any
+    if (win.api) {
+      win.api.send('actions', {
+        type: 'start-seeding-videos',
+        data: JSON.stringify(configuration.value),
+      })
+    }
+  }
 }
 
 const stopActive = () => {
-  // configuration.value.running = false
-  proxy.$notification('warning', proxy.$t('stopInteractive'))
-  proxy.$localSocket.emit('action-close', {
-    type: 'interactive',
-    uid: '',
-  })
+  running.value = false
+  if (window) {
+    const win = window as any
+    if (win.api) {
+      win.api.send('actions', {
+        type: 'stop-seeding-videos',
+        data: JSON.stringify(configuration.value),
+      })
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>

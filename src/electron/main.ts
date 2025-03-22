@@ -29,7 +29,7 @@ let data: IData = {
     loginInfo: {
       username: '',
       password: '',
-      rememberPwd: false
+      rememberPwd: false,
     },
     seedings: {
       seedingVideos: {
@@ -56,8 +56,8 @@ function createWindow() {
     minHeight: screen.getPrimaryDisplay().workAreaSize.height * 0.6,
     icon: join(__dirname, './../../../src/assets/logo.png'),
     webPreferences: {
-      preload: join(__dirname, '../electron/preload.js')
-    }
+      preload: join(__dirname, '../electron/preload.js'),
+    },
   })
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173')
@@ -90,7 +90,7 @@ if (!existsSync(join(defaultDir, 'chrome'))) {
 app.whenReady().then(() => {
   console.log('running')
   win = createWindow()
-  app.on('activate', function() {
+  app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 
@@ -98,16 +98,15 @@ app.whenReady().then(() => {
     sendToClient('init-data', data)
   })
   ipcMain.on('edit-info', (e, info) => {
-    console.log(info)
     data[info.type as keyof IData] = JSON.parse(info.data)
     writeFileSync(join(defaultDir, `/config/data.txt`), JSON.stringify(data))
   })
-<<<<<<< HEAD
-  // launchTikTok('thangthuy723').then()
-=======
   // followTiktok('thangthuy723','DieuThuy1108@').then()
   // followTiktok('thangthuy723').then()
->>>>>>> 4b3527dbb8956e2bd89c036abb98be40b3284378
+
+  ipcMain.on('init-data', () => {
+    // actions
+  })
 })
 //
 app.on('window-all-closed', () => {

@@ -76,25 +76,28 @@ const running = ref(false)
 const configuration = ref(store.baseSetiings.seedings.buffFollow)
 
 const startActive = () => {
-  // if (!configuration.value.script) {
-  //   proxy.$notification('error', proxy.$t('selectScriptPlease'))
-  // } else {
-  //   configuration.value.running = true
-  //   const selectedUser = accountStore.accountList.filter((x) => x.status)
-  //   proxy.$localSocket.emit('start-interactive', {
-  //     configuration: configuration.value,
-  //     users: selectedUser
-  //   })
-  // }
+  if (window) {
+    const win = window as any
+    if (win.api) {
+      win.api.send('actions', {
+        type: 'start-buff-follow',
+        data: JSON.stringify(configuration.value),
+      })
+    }
+  }
 }
 
 const stopActive = () => {
-  // configuration.value.running = false
-  proxy.$notification('warning', proxy.$t('stopInteractive'))
-  proxy.$localSocket.emit('action-close', {
-    type: 'interactive',
-    uid: '',
-  })
+  running.value = false
+  if (window) {
+    const win = window as any
+    if (win.api) {
+      win.api.send('actions', {
+        type: 'stop-buff-follow',
+        data: JSON.stringify(configuration.value),
+      })
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>
