@@ -104,7 +104,7 @@ app.whenReady().then(() => {
   // followTiktok('thangthuy723','DieuThuy1108@').then()
   // followTiktok('thangthuy723').then()
 
-  ipcMain.on('init-data', () => {
+  ipcMain.on('init-data', (d: { type: string; data: any }) => {
     // actions
   })
 })
