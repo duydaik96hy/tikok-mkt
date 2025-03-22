@@ -16,7 +16,17 @@ export interface IBaseSettings {
     rememberPwd: boolean
   }
   seedings: {
-    buffFollow: string
-    seedingVideos: string
+    seedingVideos: {
+      numberOfStreams: number
+      viewVideoTime: Array<number>
+      idLists: string
+    }
+
+    buffFollow: {
+      numberOfStreams: number
+      viewVideoTime: Array<number>
+      followAfterWatch: Array<number>
+      idLists: string
+    }
   }
 }

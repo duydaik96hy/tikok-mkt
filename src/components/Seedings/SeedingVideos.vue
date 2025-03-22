@@ -3,8 +3,8 @@
   <div class="f-s-b mb-2">
     <span style="max-width: 50%">{{ $t('numberOfStreams') }}</span>
     <span>
-      <el-input-number size="small" v-model="configuration.numberOfStreams.value" :step="1" />
-      {{ $t('times') }}
+      <el-input-number size="small" v-model="configuration.numberOfStreams" :step="1" />
+      {{ $t('streams') }}
     </span>
   </div>
   <div class="f-s-b mb-2">
@@ -12,9 +12,9 @@
     <span class="f-s">
       <INumberRanger
         style="width: 90%; text-align: right"
-        v-model="configuration.viewVideoTime.value"
+        v-model="configuration.viewVideoTime"
       ></INumberRanger>
-      {{ $t('times') }}
+      {{ $t('second') }}
     </span>
   </div>
   <div class="mb-2">
@@ -22,19 +22,20 @@
     <div>
       <el-input
         type="textarea"
-        v-model="configuration.idLists.value"
+        v-model="configuration.idLists"
         rows="6"
+        :placeholder="$t('typevideoIdListPlease')"
         style="width: 100%"
       />
     </div>
   </div>
 
   <div class="f-c action-btn">
-    <button class="btn-2 start" v-show="!configuration.running" @click="startActive">
+    <button class="btn-2 start" v-show="!running" @click="startActive">
       {{ $t('start') }}
     </button>
     &nbsp;
-    <button class="btn-2 stop" v-show="configuration.running" @click="stopActive">
+    <button class="btn-2 stop" v-show="running" @click="stopActive">
       {{ $t('stop') }}
     </button>
   </div>
@@ -46,21 +47,8 @@ import { Store } from '../../stores'
 
 const store = Store()
 const { proxy } = getCurrentInstance()
-
-const configuration = ref({
-  numberOfStreams: 1,
-  viewVideoTime: {
-    value: [1, 100],
-    unit: 'second',
-  },
-  idLists: {
-    status: false,
-    type: 8,
-    value: '',
-    placeholder: 'typevideoIdListPlease',
-  },
-  running: false,
-})
+const configuration = ref(store.baseSetiings.seedings.seedingVideos)
+const running = ref()
 
 const startActive = () => {
   // if (!configuration.value.script) {
@@ -76,7 +64,7 @@ const startActive = () => {
 }
 
 const stopActive = () => {
-  configuration.value.running = false
+  // configuration.value.running = false
   proxy.$notification('warning', proxy.$t('stopInteractive'))
   proxy.$localSocket.emit('action-close', {
     type: 'interactive',

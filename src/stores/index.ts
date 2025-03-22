@@ -32,6 +32,10 @@ export const Store = defineStore('setting', () => {
       password: '',
       rememberPwd: false,
     },
+    seedings: {
+      seedingVideos: '',
+      buffFollow: '',
+    },
   })
 
   const initData = (data: any) => {

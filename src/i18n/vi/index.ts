@@ -83,4 +83,11 @@ export default {
   SeedingVideos: 'Seeding Videos',
   start: 'Bắt đầu',
   stop: 'Dừng',
+  numberOfStreams: 'Số luồng chạy đồng thời',
+  viewVideoTime: 'Thời gian xem Video',
+  followAfterWatch: 'Follow sau khi xem',
+  idLists: 'Danh sách Id',
+  times: 'lần',
+  streams: 'luồng',
+  second: 'giây',
 }

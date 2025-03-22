@@ -32,8 +32,17 @@ let data: IData = {
       rememberPwd: false,
     },
     seedings: {
-      seedingVideos: '',
-      buffFollow: '',
+      seedingVideos: {
+        numberOfStreams: 1,
+        viewVideoTime: [10, 100],
+        idLists: '',
+      },
+      buffFollow: {
+        numberOfStreams: 1,
+        viewVideoTime: [10, 100],
+        followAfterWatch: [1, 3],
+        idLists: '',
+      },
     },
   },
 }
@@ -93,7 +102,7 @@ app.whenReady().then(() => {
     data[info.type as keyof IData] = JSON.parse(info.data)
     writeFileSync(join(defaultDir, `/config/data.txt`), JSON.stringify(data))
   })
-  launchTikTok('thangthuy723').then()
+  // launchTikTok('thangthuy723').then()
 })
 //
 app.on('window-all-closed', () => {

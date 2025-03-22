@@ -3,15 +3,15 @@
   <div class="f-s-b mb-2">
     <span style="max-width: 50%">{{ $t('numberOfStreams') }}</span>
     <span>
-      <el-input-number size="small" v-model="configuration.numberOfStreams.value" :step="1" />
-      {{ $t('times') }}&nbsp;&nbsp;
+      <el-input-number size="small" v-model="configuration.numberOfStreams" :step="1" />
+      {{ $t('streams') }}&nbsp;&nbsp;
     </span>
   </div>
   <div class="f-s-b mb-2">
     <span style="max-width: 50%">{{ $t('viewVideoTime') }}</span>
     <INumberRanger
       style="width: 45%; text-align: right"
-      v-model="configuration.viewVideoTime.value"
+      v-model="configuration.viewVideoTime"
     ></INumberRanger>
   </div>
   <div class="f-s-b mb-2">
@@ -19,7 +19,7 @@
     <span class="f-s">
       <INumberRanger
         style="width: 90%; text-align: right"
-        v-model="configuration.followAfterWatch.value"
+        v-model="configuration.followAfterWatch"
       ></INumberRanger>
       video
     </span>
@@ -28,21 +28,16 @@
   <div class="mb-2">
     <span style="max-width: 50%">{{ $t('idLists') }}</span>
     <div>
-      <el-input
-        type="textarea"
-        v-model="configuration.idLists.value"
-        rows="6"
-        style="width: 100%"
-      />
+      <el-input type="textarea" v-model="configuration.idLists" rows="6" style="width: 100%" />
     </div>
   </div>
 
   <div class="f-c action-btn">
-    <button class="btn-2 start" v-show="!configuration.running" @click="startActive">
+    <button class="btn-2 start" v-show="!running" @click="startActive">
       {{ $t('start') }}
     </button>
     &nbsp;
-    <button class="btn-2 stop" v-show="configuration.running" @click="stopActive">
+    <button class="btn-2 stop" v-show="running" @click="stopActive">
       {{ $t('stop') }}
     </button>
   </div>
@@ -76,32 +71,9 @@ const { proxy } = getCurrentInstance()
 
 const showDialog = ref(false)
 const isAddAction = ref(false)
+const running = ref(false)
 
-const configuration = ref({
-  numberOfStreams: {
-    type: 3,
-    value: 1,
-  },
-  viewVideoTime: {
-    status: false,
-    value: [1, 100],
-    type: 8,
-    unit: 'second',
-  },
-  followAfterWatch: {
-    status: false,
-    value: [1, 3],
-    type: 8,
-    unit: 'video',
-  },
-  idLists: {
-    status: false,
-    value: '',
-    type: 6,
-    unit: '',
-  },
-  running: false,
-})
+const configuration = ref(store.baseSetiings.seedings.buffFollow)
 
 const startActive = () => {
   // if (!configuration.value.script) {
@@ -117,7 +89,7 @@ const startActive = () => {
 }
 
 const stopActive = () => {
-  configuration.value.running = false
+  // configuration.value.running = false
   proxy.$notification('warning', proxy.$t('stopInteractive'))
   proxy.$localSocket.emit('action-close', {
     type: 'interactive',
