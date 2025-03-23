@@ -41,7 +41,7 @@ export async function launch(
       height: 900,
     },
     args: [
-      '--window-size=360,360',
+      '--window-size=360,500',
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-blink-features=AutomationControlled',

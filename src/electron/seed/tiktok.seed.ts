@@ -4,6 +4,7 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import { launch, timeout } from '../libs/baseFunction'
 import axios from 'axios'
 import { IAccount } from '../model/userInfomation'
+import { parentPort } from 'worker_threads'
 
 const stealthPlugin = StealthPlugin()
 stealthPlugin.enabledEvasions.delete('iframe.contentWindow')
@@ -21,12 +22,23 @@ puppeteer.use(stealthPlugin)
 //   folder: 'user1'
 // }
 
-export async function loginTikTok(username: string, password: string) {
-  const browser = await puppeteer.launch({
-    headless: false,
-    userDataDir: process.cwd() + '/src/electron/data/browser-data/' + username,
-  })
+export async function userLoginTikTok(
+  user: IAccount,
+  headless: boolean,
+  userDataDir: string,
+  position: string,
+) {
+  const browser = await launch(user, headless, userDataDir, position)
   const page = await browser.newPage()
+  if (parentPort) {
+    parentPort.once('message', async (message) => {
+      if (message === 'exit') {
+        if (page) await page.close()
+        if (browser) await browser.close()
+        parentPort?.postMessage('closed-browser')
+      }
+    })
+  }
   await page.goto('https://www.tiktok.com/login')
 
   await timeout(1000)
@@ -40,16 +52,17 @@ export async function loginTikTok(username: string, password: string) {
   const frames = await page.frames()
   const frame = frames[0]
   await frame.waitForSelector('input[type="text"]')
-  await frame.type('input[type="text"]', username, { delay: 100 })
+  await frame.type('input[type="text"]', user.username, { delay: 100 })
   await timeout(1000)
   await frame.waitForSelector('input[type="password"]')
-  await frame.type('input[type="password"]', password, { delay: 100 })
+  await frame.type('input[type="password"]', user.password, { delay: 100 })
 
   await frame.waitForSelector('button[type="submit"]')
   await frame.click('button[type="submit"]')
   //TODO: bypass captcha
   await page.waitForNavigation()
-  return page
+  await timeout(3000)
+  // return page
 }
 
 export async function userSeedingVideo(
@@ -63,6 +76,15 @@ export async function userSeedingVideo(
 ): Promise<void> {
   if (!videoPath.startsWith('https://www.tiktok.com/')) {
     return
+  }
+  if (parentPort) {
+    parentPort.once('message', async (message) => {
+      if (message === 'exit') {
+        if (page) await page.close()
+        if (browser) await browser.close()
+        parentPort?.postMessage('closed-browser')
+      }
+    })
   }
   const browser = await launch(user, headless, position, userDataDir)
   const page = await browser.newPage()
@@ -128,6 +150,15 @@ export async function followTiktok(
 ) {
   const browser = await launch(user, headless, position, userDataDir)
   const page = await browser.newPage()
+  if (parentPort) {
+    parentPort.once('message', async (message) => {
+      if (message === 'exit') {
+        if (page) await page.close()
+        if (browser) await browser.close()
+        parentPort?.postMessage('closed-browser')
+      }
+    })
+  }
   await page.goto('https://www.tiktok.com/' + account_id)
   await timeout(2000)
   const timeToWatch =
@@ -177,7 +208,7 @@ export async function buffFollows(
         Array.from({ length: data.numberOfStreams }).map(async (j, k) => {
           const userIndex = i * data.numberOfStreams + k
           const pX = (k % 5) * 360
-          const pY = (Math.floor(k / 5) % 3) * 360
+          const pY = (Math.floor(k / 5) % 3) * 500
           return await followTiktok(
             users[userIndex],
             id,
@@ -212,13 +243,32 @@ export async function seedingVideo(
         }
         const subPath = listPath[pathIndex].split('|')
         const pX = (k % 5) * 360
-        const pY = (Math.floor(k / 5) % 3) * 360
+        const pY = (Math.floor(k / 5) % 3) * 500
         return await userSeedingVideo(
           data.users[userIndex],
           subPath[0],
           headless,
           data.watchVideoTime,
           subPath[1],
+          userDataDir,
+          `--window-position=${pX},${pY}`,
+        )
+      }),
+    )
+  }
+}
+
+export async function loginTikTok(users: Array<IAccount>, userDataDir: string, headless: boolean) {
+  const length = users.length / 10
+  for (let i = 0; i < length; i++) {
+    await Promise.all(
+      Array.from({ length: 10 }).map(async (j, k) => {
+        const pX = (k % 5) * 360
+        const pY = (Math.floor(k / 5) % 3) * 500
+        const userIndex = i * 10 + k
+        return await userLoginTikTok(
+          users[userIndex],
+          headless,
           userDataDir,
           `--window-position=${pX},${pY}`,
         )

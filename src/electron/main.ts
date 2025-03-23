@@ -4,13 +4,16 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { IAccount } from './model/userInfomation'
 import { IBaseSettings } from './model/baseSetiings'
 import { IUser } from './model/userInfomation'
-import { seedingVideo } from './seed/tiktok.seed'
+import { loginTikTok, seedingVideo } from './seed/tiktok.seed'
+import { Worker } from 'worker_threads'
 
 const isDev = !app.isPackaged
 const defaultDir = app.isPackaged
   ? app.getPath('userData')
   : resolve(process.cwd(), './src/electron/data')
+const browserDataDir = join(defaultDir, './chrome/')
 let win: BrowserWindow | null = null
+let workerPool: Array<{ type: string; worker: Worker }> = []
 
 interface IData {
   userInfo: IUser | null
@@ -102,24 +105,64 @@ app.whenReady().then(() => {
     writeFileSync(join(defaultDir, `/config/data.txt`), JSON.stringify(data))
   })
 
-  ipcMain.on('actions', (d: { type: string; data: any }) => {
+  ipcMain.on('actions', (d: { type: string; data: any; users: Array<IAccount> }) => {
     //
+    const index = workerPool.findIndex((x) => x.type == d.type)
     switch (d.type) {
       case 'start-seeding-videos':
         data.baseSettings.seedings.seedingVideos = d.data
-        seedingVideo(data.accountList, join(defaultDir, './chrome/'), d.data, false)
+        createWorker(join(__dirname, '/data/worker/seedingVideo.js'), { ...d }, false)
         break
       case 'stop-seeding-videos':
+        if (index != -1) {
+          workerPool[index].worker.postMessage('exit')
+        }
         break
       case 'start-buff-follow':
+        data.baseSettings.seedings.buffFollow = d.data
+        createWorker(join(__dirname, '/data/worker/buffFollow.js'), { ...d }, false)
         break
       case 'stop-buff-follow':
+        if (index != -1) {
+          workerPool[index].worker.postMessage('exit')
+        }
         break
+      case 'login-tiktok':
+        createWorker(join(__dirname, '/data/worker/loginTikTok.js'), { ...d }, false)
+
+        break
+
       default:
         break
     }
   })
 })
+
+function createWorker(link: string, data: any, headless: boolean) {
+  const worker = new Worker(link)
+  worker.once('message', (message) => {
+    if (message === 'closed-browser') {
+      worker.terminate()
+    }
+  })
+  worker.postMessage(
+    JSON.stringify({
+      data,
+      headless,
+      defaultDir: browserDataDir,
+    }),
+  )
+  const index = workerPool.findIndex((x) => x.type == data.type)
+  if (index != -1) {
+    workerPool = [
+      ...workerPool.slice(0, index),
+      { type: data.type, worker },
+      ...workerPool.slice(index + 1),
+    ]
+  } else {
+    workerPool.push({ type: data.type, worker })
+  }
+}
 //
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
