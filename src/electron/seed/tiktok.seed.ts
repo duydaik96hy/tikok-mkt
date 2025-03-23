@@ -4,6 +4,7 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import { launch, timeout } from '../libs/baseFunction'
 import axios from 'axios'
 import { IAccount } from '../model/userInfomation'
+import { Page } from 'puppeteer'
 
 const stealthPlugin = StealthPlugin()
 stealthPlugin.enabledEvasions.delete('iframe.contentWindow')
@@ -21,14 +22,7 @@ puppeteer.use(stealthPlugin)
 //   folder: 'user1'
 // }
 
-export async function loginTikTok(username: string, password: string) {
-  const browser = await puppeteer.launch({
-    headless: false,
-    userDataDir: process.cwd() + '/src/electron/data/browser-data/' + username,
-  })
-  const page = await browser.newPage()
-  await page.goto('https://www.tiktok.com/login')
-
+export async function loginTikTok(page: Page, username: string, password: string) {
   await timeout(1000)
   await page.waitForSelector('[data-e2e="channel-item"]', { visible: true })
   const buttons = await page.$$('[data-e2e="channel-item"]')
@@ -44,12 +38,21 @@ export async function loginTikTok(username: string, password: string) {
   await timeout(1000)
   await frame.waitForSelector('input[type="password"]')
   await frame.type('input[type="password"]', password, { delay: 100 })
-
-  await frame.waitForSelector('button[type="submit"]')
-  await frame.click('button[type="submit"]')
-  //TODO: bypass captcha
+  let loginButton = await page.$$('button[data-e2e="login-button"]')
+  if (loginButton.length) {
+    await loginButton[0].click()
+  } else {
+    loginButton = await page.$$('button[type="submit"]')
+    if (loginButton.length) {
+      await loginButton[0].click()
+    }
+  }
   await page.waitForNavigation()
-  return page
+  const isPass = await byPassCaptcha(page)
+  if (isPass) {
+    return page
+  }
+  throw Error(`Unable to login TikTok with username: ${username}`)
 }
 
 export async function userSeedingVideo(
@@ -59,7 +62,7 @@ export async function userSeedingVideo(
   watchVideoTime: number[],
   description: string,
   userDataDir: string,
-  position: string,
+  position: string
 ): Promise<void> {
   if (!videoPath.startsWith('https://www.tiktok.com/')) {
     return
@@ -83,7 +86,7 @@ export async function userSeedingVideo(
       await timeout(1000)
       const commentInput = await page.waitForSelector('div[data-e2e="comment-text"]', {
         visible: true,
-        timeout: 10000,
+        timeout: 10000
       })
       let commentData = 'Hello!'
       const title = await page.evaluate(() => {
@@ -100,7 +103,7 @@ export async function userSeedingVideo(
         await commentInput.type(commentData, { delay: 100 })
         await timeout(2000)
         const postButton = await page.waitForSelector('div[data-e2e="comment-post"]', {
-          visible: true,
+          visible: true
         })
         if (postButton) {
           await postButton.click()
@@ -118,13 +121,53 @@ export async function userSeedingVideo(
   await browser.close()
 }
 
-export async function followTiktok(
+export async function isLoginTiktok(page: Page | undefined, username: string, password: string) {
+  if (!page) {
+    const browser = await puppeteer.launch({
+      headless: false
+    })
+    page = await browser.newPage()
+    await page.goto('https://www.tiktok.com/@khinaocony_thidoiten')
+  }
+  await timeout(6000)
+  await byPassCaptcha(page)
+  const loginButton = await page.$$('button[id="header-login-button"]')
+  if (loginButton.length) {
+    await loginButton[loginButton.length - 1].click()
+  }
+  await timeout(1000)
+  await loginTikTok(page, username, password)
+}
+
+async function byPassCaptcha(page: Page): Promise<boolean> {
+  const audioCaptcha = await page.$$('button[id="captcha_switch_button"]')
+  if (audioCaptcha.length) {
+    await timeout(1000)
+    await audioCaptcha[0].click()
+    await timeout(1000)
+    const src = await page.$eval('img', (img: HTMLImageElement) => img.src)
+    await timeout(1000)
+    if (!src) {
+      console.error('cant get src of captcha audio')
+      return false
+    }
+    const captcha = await convertAudioToText(src)
+    const frames = await page.frames()
+    const frame = frames[0]
+    await frame.waitForSelector('input[type="text"]')
+    await frame.type('input[type="text"]', captcha, { delay: 100 })
+    await timeout(2000)
+  }
+  return true
+}
+
+async function followTiktok(
   user: IAccount,
   account_id: string,
   headless: boolean,
   watchVideoTime: number[],
   userDataDir: string,
-  position: string,
+  position: string
 ) {
   const browser = await launch(user, headless, position, userDataDir)
   const page = await browser.newPage()
@@ -163,7 +206,7 @@ export async function buffFollows(
   users: IAccount[],
   data: any,
   userDataDir: string,
-  headless: boolean,
+  headless: boolean
 ) {
   const idLists = data.idLists
     .split('\n')
@@ -184,9 +227,9 @@ export async function buffFollows(
             headless,
             data.watchVideoTime,
             userDataDir,
-            `--window-position=${pX},${pY}`,
+            `--window-position=${pX},${pY}`
           )
-        }),
+        })
       )
     }
     await timeout(5000)
@@ -197,10 +240,10 @@ export async function seedingVideo(
   users: IAccount[],
   userDataDir: string,
   data: any,
-  headless: boolean,
+  headless: boolean
 ) {
   const length = users.length / data.numberOfStreams
-  const listPath = data.idLists.split('\n').filter((i) => i)
+  const listPath = data.idLists.split('\n').filter((i: string) => i)
   let pathIndex = 0
   for (let i = 0; i < length; i++) {
     await Promise.all(
@@ -220,9 +263,9 @@ export async function seedingVideo(
           data.watchVideoTime,
           subPath[1],
           userDataDir,
-          `--window-position=${pX},${pY}`,
+          `--window-position=${pX},${pY}`
         )
-      }),
+      })
     )
   }
 }
@@ -231,13 +274,28 @@ async function generateComment(title: string): Promise<string> {
   const response = await axios.post(
     'http://155.159.255.140:3000/api/common/comment/generate',
     {
-      title: title,
+      title: title
     },
     {
       headers: {
-        'internal-api-key': '123123', // todo: imp this
-      },
+        'internal-api-key': '123123' // todo: imp this
+      }
+    }
+  )
+  return response.data?.data
+}
+
+async function convertAudioToText(url: string): Promise<string> {
+  const response = await axios.post(
+    'http://155.159.255.140:3000/api/common/comment/generate',
+    {
+      url: url
     },
+    {
+      headers: {
+        'internal-api-key': '123123' // todo: imp this
+      }
+    }
   )
   return response.data?.data
 }
