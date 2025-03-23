@@ -272,7 +272,7 @@ export async function buffFollows(
     const id = idLists[index]
     const length = users.length / data.numberOfStreams
     for (let i = 0; i < length; i++) {
-      await Promise.all(
+      await Promise.allSettled(
         Array.from({ length: data.numberOfStreams }).map(async (j, k) => {
           const userIndex = i * data.numberOfStreams + k
           const pX = (k % 5) * 360
@@ -302,7 +302,7 @@ export async function seedingVideo(
   const listPath = data.idLists.split('\n').filter((i: string) => i)
   let pathIndex = 0
   for (let i = 0; i < length; i++) {
-    await Promise.all(
+    await Promise.allSettled(
       Array.from({ length: data.numberOfStreams }).map(async (j, k) => {
         pathIndex = i * data.numberOfStreams + k
         const userIndex = i * data.numberOfStreams + k
@@ -329,7 +329,7 @@ export async function seedingVideo(
 export async function loginTikTok(users: Array<IAccount>, userDataDir: string, headless: boolean) {
   const length = users.length / 10
   for (let i = 0; i < length; i++) {
-    await Promise.all(
+    await Promise.allSettled(
       Array.from({ length: 10 }).map(async (j, k) => {
         const pX = (k % 5) * 360
         const pY = (Math.floor(k / 5) % 3) * 500
