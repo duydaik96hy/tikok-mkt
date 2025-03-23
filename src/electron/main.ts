@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { IAccount } from './model/userInfomation'
 import { IBaseSettings } from './model/baseSetiings'
 import { IUser } from './model/userInfomation'
+import { seedingVideo } from './seed/tiktok.seed'
 
 const isDev = !app.isPackaged
 const defaultDir = app.isPackaged
@@ -46,7 +47,6 @@ let data: IData = {
     },
   },
 }
-
 //
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -101,11 +101,23 @@ app.whenReady().then(() => {
     data[info.type as keyof IData] = JSON.parse(info.data)
     writeFileSync(join(defaultDir, `/config/data.txt`), JSON.stringify(data))
   })
-  // followTiktok('thangthuy723','DieuThuy1108@').then()
-  // followTiktok('thangthuy723').then()
 
-  ipcMain.on('init-data', (d: { type: string; data: any }) => {
-    // actions
+  ipcMain.on('actions', (d: { type: string; data: any }) => {
+    //
+    switch (d.type) {
+      case 'start-seeding-videos':
+        data.baseSettings.seedings.seedingVideos = d.data
+        seedingVideo(data.accountList, join(defaultDir, './chrome/'), d.data, false)
+        break
+      case 'stop-seeding-videos':
+        break
+      case 'start-buff-follow':
+        break
+      case 'stop-buff-follow':
+        break
+      default:
+        break
+    }
   })
 })
 //

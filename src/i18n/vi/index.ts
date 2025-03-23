@@ -90,4 +90,5 @@ export default {
   times: 'lần',
   streams: 'luồng',
   second: 'giây',
+  typevideoIdListPlease: 'Vui lòng nhập danh sách Id',
 }

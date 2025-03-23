@@ -118,7 +118,7 @@ export async function userSeedingVideo(
   await browser.close()
 }
 
-async function followTiktok(
+export async function followTiktok(
   user: IAccount,
   account_id: string,
   headless: boolean,
@@ -159,22 +159,54 @@ async function followTiktok(
   await browser.close()
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function seedingVideo(
+export async function buffFollows(
+  users: IAccount[],
+  data: any,
+  userDataDir: string,
+  headless: boolean,
+) {
+  const idLists = data.idLists
+    .split('\n')
+    .filter((i: string) => i)
+    .map((x: string) => (x.includes('@') ? x : '@' + x))
+  for (let index = 0; index < idLists.length; index++) {
+    const id = idLists[index]
+    const length = users.length / data.numberOfStreams
+    for (let i = 0; i < length; i++) {
+      await Promise.all(
+        Array.from({ length: data.numberOfStreams }).map(async (j, k) => {
+          const userIndex = i * data.numberOfStreams + k
+          const pX = (k % 5) * 360
+          const pY = (Math.floor(k / 5) % 3) * 360
+          return await followTiktok(
+            users[userIndex],
+            id,
+            headless,
+            data.watchVideoTime,
+            userDataDir,
+            `--window-position=${pX},${pY}`,
+          )
+        }),
+      )
+    }
+    await timeout(5000)
+  }
+}
+
+export async function seedingVideo(
   users: IAccount[],
   userDataDir: string,
   data: any,
-  videoPath: string,
   headless: boolean,
 ) {
   const length = users.length / data.numberOfStreams
-  const listPath = videoPath.split('\n').filter((i) => i)
+  const listPath = data.idLists.split('\n').filter((i) => i)
   let pathIndex = 0
   for (let i = 0; i < length; i++) {
     await Promise.all(
-      Array.from({ length: data.configuration.numberOfStreams }).map(async (j, k) => {
-        pathIndex = i * data.configuration.numberOfStreams + k
-        const userIndex = i * data.configuration.numberOfStreams + k
+      Array.from({ length: data.numberOfStreams }).map(async (j, k) => {
+        pathIndex = i * data.numberOfStreams + k
+        const userIndex = i * data.numberOfStreams + k
         if (!listPath[pathIndex]) {
           pathIndex = 0
         }

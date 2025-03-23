@@ -33,8 +33,17 @@ export const Store = defineStore('setting', () => {
       rememberPwd: false,
     },
     seedings: {
-      seedingVideos: '',
-      buffFollow: '',
+      seedingVideos: {
+        numberOfStreams: 1,
+        viewVideoTime: [10, 100],
+        idLists: '',
+      },
+      buffFollow: {
+        numberOfStreams: 1,
+        viewVideoTime: [10, 100],
+        followAfterWatch: [1, 3],
+        idLists: '',
+      },
     },
   })
 

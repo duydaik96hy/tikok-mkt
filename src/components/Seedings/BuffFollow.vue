@@ -13,6 +13,7 @@
       style="width: 45%; text-align: right"
       v-model="configuration.viewVideoTime"
     ></INumberRanger>
+    {{ $t('second') }}
   </div>
   <div class="f-s-b mb-2">
     <span style="max-width: 50%">{{ $t('followAfterWatch') }}</span>
@@ -28,7 +29,13 @@
   <div class="mb-2">
     <span style="max-width: 50%">{{ $t('idLists') }}</span>
     <div>
-      <el-input type="textarea" v-model="configuration.idLists" rows="6" style="width: 100%" />
+      <el-input
+        type="textarea"
+        v-model="configuration.idLists"
+        :placeholder="$t('typevideoIdListPlease')"
+        rows="6"
+        style="width: 100%"
+      />
     </div>
   </div>
 
