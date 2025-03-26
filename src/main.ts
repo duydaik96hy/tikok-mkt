@@ -25,6 +25,31 @@ export enum INotificationType {
   warning = 'warning',
 }
 
+function copy(val) {
+  try {
+    navigator.clipboard.writeText(val).then(() => {
+      // copySuccess.value = trues
+      setTimeout(() => {
+        // copySuccess.value = false
+      }, 2000)
+    })
+  } catch (e) {
+    console.log(e)
+    const textarea = document.createElement('textarea')
+    textarea.readOnly = true
+    textarea.style.position = 'absolute'
+    textarea.style.left = '999999999999'
+    textarea.value = val
+    document.body.appendChild(textarea)
+    textarea.select()
+    textarea.setSelectionRange(0, val.length)
+    document.execCommand('copy')
+    document.body.removeChild(textarea)
+  }
+}
+
+app.config.globalProperties.$copy = (text: string) => copy(text)
+
 app.config.globalProperties.$notification = (type: INotificationType, message: string) => {
   ElNotification[type]({
     message,

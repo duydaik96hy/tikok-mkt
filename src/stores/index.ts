@@ -8,7 +8,6 @@ function editInfo(type: string, data: any) {
   if (window) {
     const win = window as any
     if (win.api) {
-      console.log(win.api)
       win.api.send('edit-info', { type, data: JSON.stringify(data) })
     }
   }

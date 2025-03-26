@@ -667,7 +667,10 @@ const clickFeild = (childs, typeActions) => {
         if (window) {
           const win = window as any
           if (win.api) {
-            win.api.send('actions', { type: 'login-tiktok', users: selectedUserList })
+            win.api.send(
+              'actions',
+              JSON.stringify({ type: 'login-tiktok', users: selectedUserList }),
+            )
           }
         }
         break
@@ -760,7 +763,6 @@ function copy(type) {
         .map((x) => {
           let t = ''
           customConfig.value.forEach((c) => {
-            console.log(c, x[c])
             t += x[c] ? x[c] + '|' : ''
           })
           return t.replace(/\|$/g, '')
@@ -936,7 +938,6 @@ watch(checkAll, (n) => {
 })
 
 watch(props, (n) => {
-  console.log(n)
   data.value = n.list
 })
 

@@ -3,7 +3,6 @@ import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('api', {
   send: (channel: string, data: any) => {
-    console.log(channel)
     // whitelist channels
     const validChannels: Array<string> = ['init-data', 'update', 'edit-info', 'actions']
     if (validChannels.includes(channel)) {

@@ -86,10 +86,14 @@ const startActive = () => {
   if (window) {
     const win = window as any
     if (win.api) {
-      win.api.send('actions', {
-        type: 'start-buff-follow',
-        data: JSON.stringify(configuration.value),
-      })
+      win.api.send(
+        'actions',
+        JSON.stringify({
+          type: 'start-buff-follow',
+          data: configuration.value,
+          users: store.accountList,
+        }),
+      )
     }
   }
 }

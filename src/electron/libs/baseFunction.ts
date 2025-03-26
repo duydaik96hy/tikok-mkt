@@ -24,18 +24,18 @@ export async function launch(
   if (user.proxy) {
     const proxyList = user.proxy
       .replace('http://', '')
-      .split('@')
+      .split(':')
       .map((x) => x.trim())
-    if (proxyList.length == 2) {
-      proxyURL = 'http://' + proxyList.slice(1).join(':')
-      proxyUsername = proxyList[0].split(':')[0]
-      proxyPassword = proxyList[1].split(':')[1]
+    if (proxyList.length == 4) {
+      proxyURL = proxyList.slice(0, 2).join(':')
+      proxyUsername = proxyList[2]
+      proxyPassword = proxyList[3]
     }
   }
 
   const params = {
     headless,
-    // executablePath: join(userDataDir, 'chrome.exe'),
+    executablePath: join(userDataDir, 'chrome.exe'),
     defaultViewport: {
       width: 1400,
       height: 900,

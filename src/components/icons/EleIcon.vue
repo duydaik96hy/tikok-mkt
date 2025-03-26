@@ -771,5 +771,4 @@ const props = defineProps({
     default: 26,
   },
 })
-console.log(props.icon)
 </script>

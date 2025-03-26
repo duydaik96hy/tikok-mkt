@@ -30,7 +30,7 @@ export async function userLoginTikTok(
   userDataDir: string,
   position: string,
 ) {
-  const browser = await launch(user, headless, userDataDir, position)
+  const browser = await launch(user, headless, position, userDataDir)
   const page = await browser.newPage()
   if (parentPort) {
     parentPort.once('message', async (message) => {
@@ -41,51 +41,68 @@ export async function userLoginTikTok(
       }
     })
   }
-  await page.goto('https://www.tiktok.com/login')
-
   await timeout(1000)
-  await page.waitForSelector('[data-e2e="channel-item"]', { visible: true })
-  const buttons = await page.$$('[data-e2e="channel-item"]')
-  await buttons[1].click()
-  await timeout(1000)
-  await page.click('a[href="/login/phone-or-email/email"]')
-  await timeout(1000)
+  try {
+    await page.goto('https://www.tiktok.com/login', {
+      waitUntil: 'networkidle2',
+      timeout: 60000,
+    })
 
-  const frames = await page.frames()
-  const frame = frames[0]
-  await frame.waitForSelector('input[type="text"]')
-  await frame.type('input[type="text"]', user.username, { delay: 100 })
-  await timeout(500)
-  await frame.waitForSelector('input[type="password"]')
-  await frame.type('input[type="password"]', user.password, { delay: 100 })
+    await timeout(1000)
+    const url = await page.url()
+    if (!url.includes('login')) {
+      console.log('login')
+      // await page.close()
+      // await browser.close()
+      return
+    }
+    await page.waitForSelector('[data-e2e="channel-item"]', { visible: true })
+    const buttons = await page.$$('[data-e2e="channel-item"]')
+    await buttons[1].click()
+    await timeout(1000)
+    await page.click('a[href="/login/phone-or-email/email"]')
+    await timeout(1000)
 
-  await frame.waitForSelector('button[type="submit"]')
-  await frame.click('button[type="submit"]')
-  //TODO: bypass captcha
-  await page.waitForNavigation()
-  await timeout(3000)
-  let loginButton = await page.$$('button[data-e2e="login-button"]')
-  if (loginButton.length) {
-    await loginButton[0].click()
-  } else {
-    loginButton = await page.$$('button[type="submit"]')
+    const frames = await page.frames()
+    const frame = frames[0]
+    await frame.waitForSelector('input[type="text"]')
+    await frame.type('input[type="text"]', user.username, { delay: 100 })
+    await timeout(500)
+    await frame.waitForSelector('input[type="password"]')
+    await frame.type('input[type="password"]', user.password, { delay: 100 })
+
+    await frame.waitForSelector('button[type="submit"]')
+    await frame.click('button[type="submit"]')
+    //TODO: bypass captcha
+    await page.waitForNavigation()
+    await timeout(3000)
+    let loginButton = await page.$$('button[data-e2e="login-button"]')
     if (loginButton.length) {
       await loginButton[0].click()
+    } else {
+      loginButton = await page.$$('button[type="submit"]')
+      if (loginButton.length) {
+        await loginButton[0].click()
+      }
     }
+    await timeout(2000)
+    const isPass = await checkAndByPassCaptchaIfNeeded(page)
+
+    if (isPass) {
+      await page.close()
+      await browser.close()
+    }
+    throw Error(`Unable to login TikTok with username: ${user.username}`)
+  } catch (error) {
+    console.log(error)
   }
-  await timeout(2000)
-  const isPass = await checkAndByPassCaptchaIfNeeded(page)
-  if (isPass) {
-    return page
-  }
-  throw Error(`Unable to login TikTok with username: ${user.username}`)
 }
 
 export async function userSeedingVideo(
   user: IAccount,
   videoPath: string,
   headless: boolean,
-  watchVideoTime: number[],
+  viewVideoTime: number[],
   description: string,
   userDataDir: string,
   position: string,
@@ -106,19 +123,21 @@ export async function userSeedingVideo(
   const page = await browser.newPage()
   await page.goto(videoPath)
   const timeToWatch =
-    Math.floor(Math.random() * (watchVideoTime[1] - watchVideoTime[0] + 1)) + watchVideoTime[0]
-  await timeout(timeToWatch * 1000)
-  await checkAndLoginTiktokIfNeeded(page, user.username, user.password)
-  await page.waitForSelector('span[data-e2e="like-icon"]', { visible: true, timeout: 10000 })
-  for (let i = 0; i < 4; i++) {
-    const likeButtons = await page.$$('span[data-e2e="like-icon"]')
-    if (likeButtons.length) {
-      await likeButtons[i].click()
+    Math.floor(Math.random() * (viewVideoTime[1] - viewVideoTime[0] + 1)) + viewVideoTime[0]
+  await timeout(1000)
+  // await checkAndLoginTiktokIfNeeded(page, user, headless, userDataDir, position)
+  if (Math.random() < 0.65) {
+    await page.waitForSelector('span[data-e2e="like-icon"]', { visible: true, timeout: 5000 })
+
+    const likeButtons = await page.$('span[data-e2e="like-icon"]')
+    if (likeButtons) {
+      await likeButtons.click()
     }
-    await timeout(1000)
-    const commentButtons = await page.$$('span[data-e2e="comment-icon"]')
-    if (commentButtons.length) {
-      await commentButtons[i].click()
+  }
+  if (Math.random() < 0.5) {
+    const commentButtons = await page.$('span[data-e2e="comment-icon"]')
+    if (commentButtons) {
+      await commentButtons.click()
       await timeout(1000)
       const commentInput = await page.waitForSelector('div[data-e2e="comment-text"]', {
         visible: true,
@@ -146,13 +165,14 @@ export async function userSeedingVideo(
         }
       }
     }
-    await timeout(3000)
-    const quitButton = await page.$$('button[data-e2e="browse-close"]')
-    await quitButton[0].click()
-    await timeout(1000)
-    await page.keyboard.press('ArrowDown')
-    await timeout(2000)
   }
+  await timeout(timeToWatch * 1000)
+  await timeout(3000)
+  const quitButton = await page.$$('button[data-e2e="browse-close"]')
+  await quitButton[0].click()
+  await timeout(1000)
+  await page.keyboard.press('ArrowDown')
+  await timeout(2000)
   await page.close()
   await browser.close()
 }
@@ -174,13 +194,19 @@ export async function userSeedingVideo(
 //     await loginTikTok(page, username, password)
 //   }
 // }
-export async function checkAndLoginTiktokIfNeeded(page: Page, username: string, password: string) {
+export async function checkAndLoginTiktokIfNeeded(
+  page: Page,
+  user: IAccount,
+  headless: boolean,
+  userDataDir: string,
+  position: string,
+) {
   await checkAndByPassCaptchaIfNeeded(page)
   const loginButton = await page.$$('button[id="header-login-button"]')
   if (loginButton.length) {
     await loginButton[loginButton.length - 1].click()
     await timeout(1000)
-    await loginTikTok(page, username, password)
+    await userLoginTikTok(user, headless, userDataDir, position)
   }
 }
 
@@ -211,7 +237,8 @@ async function followTiktok(
   user: IAccount,
   account_id: string,
   headless: boolean,
-  watchVideoTime: number[],
+  viewVideoTime: number[],
+  followAfterWatch: number[],
   userDataDir: string,
   position: string,
 ) {
@@ -228,14 +255,18 @@ async function followTiktok(
   }
   await page.goto('https://www.tiktok.com/' + account_id)
   await timeout(2000)
-  await checkAndLoginTiktokIfNeeded(page, user.username, user.password)
-  const timeToWatch =
-    Math.floor(Math.random() * (watchVideoTime[1] - watchVideoTime[0] + 1)) + watchVideoTime[0]
+  // await checkAndLoginTiktokIfNeeded(page, user, headless, userDataDir, position)
+  const randomWatch =
+    Math.floor(Math.random() * (followAfterWatch[1] - followAfterWatch[0] + 1)) +
+    followAfterWatch[0]
   const videos = await page.$$('div[data-e2e="user-post-item"]')
   if (videos.length) {
-    const length = Math.min(videos.length, 2)
+    const length = Math.min(videos.length, randomWatch)
     for (let i = 0; i < length; i++) {
+      const timeToWatch =
+        Math.floor(Math.random() * (viewVideoTime[1] - viewVideoTime[0] + 1)) + viewVideoTime[0]
       await videos[i].click()
+
       await timeout(timeToWatch)
       const likeButtons = await page.$$('span[data-e2e="browse-like-icon"]')
       if (likeButtons.length) {
@@ -246,14 +277,14 @@ async function followTiktok(
       if (quitButton.length) {
         await quitButton[0].click()
       }
-      await timeout(1000)
     }
   }
-  await timeout(2000)
-  const followButtons = await page.$$('button[data-e2e="follow-button"]')
-  if (followButtons.length) {
-    await followButtons[0].click()
+  await timeout(1000)
+  const followButtons = await page.$('button[data-e2e="follow-button"]')
+  if (followButtons && Math.random() < 0.7) {
+    await followButtons.click()
   }
+  await timeout(3000)
   await page.close()
   await browser.close()
 }
@@ -264,6 +295,8 @@ export async function buffFollows(
   userDataDir: string,
   headless: boolean,
 ) {
+  console.log(data)
+  if (!data.idLists) return
   const idLists = data.idLists
     .split('\n')
     .filter((i: string) => i)
@@ -272,7 +305,7 @@ export async function buffFollows(
     const id = idLists[index]
     const length = users.length / data.numberOfStreams
     for (let i = 0; i < length; i++) {
-      await Promise.allSettled(
+      await Promise.all(
         Array.from({ length: data.numberOfStreams }).map(async (j, k) => {
           const userIndex = i * data.numberOfStreams + k
           const pX = (k % 5) * 360
@@ -281,7 +314,8 @@ export async function buffFollows(
             users[userIndex],
             id,
             headless,
-            data.watchVideoTime,
+            data.viewVideoTime,
+            data.followAfterWatch,
             userDataDir,
             `--window-position=${pX},${pY}`,
           )
@@ -301,45 +335,53 @@ export async function seedingVideo(
   const length = users.length / data.numberOfStreams
   const listPath = data.idLists.split('\n').filter((i: string) => i)
   let pathIndex = 0
+  console.log(data)
   for (let i = 0; i < length; i++) {
-    await Promise.allSettled(
-      Array.from({ length: data.numberOfStreams }).map(async (j, k) => {
-        pathIndex = i * data.numberOfStreams + k
-        const userIndex = i * data.numberOfStreams + k
-        if (!listPath[pathIndex]) {
-          pathIndex = 0
-        }
-        const subPath = listPath[pathIndex].split('|')
-        const pX = (k % 5) * 360
-        const pY = (Math.floor(k / 5) % 3) * 500
-        return await userSeedingVideo(
-          data.users[userIndex],
-          subPath[0],
-          headless,
-          data.watchVideoTime,
-          subPath[1],
-          userDataDir,
-          `--window-position=${pX},${pY}`,
-        )
-      }),
-    )
+    try {
+      await Promise.all(
+        Array.from({ length: data.numberOfStreams }).map(async (j, k) => {
+          pathIndex = i * data.numberOfStreams + k
+          const userIndex = i * data.numberOfStreams + k
+          if (!users[userIndex]) return
+          if (!listPath[pathIndex]) {
+            pathIndex = 0
+          }
+          const subPath = listPath[pathIndex].split('|')
+          const pX = (k % 5) * 360
+          const pY = (Math.floor(k / 5) % 3) * 500
+          return await userSeedingVideo(
+            users[userIndex],
+            subPath[0],
+            headless,
+            data.viewVideoTime,
+            subPath[1],
+            userDataDir,
+            `--window-position=${pX},${pY}`,
+          )
+        }),
+      )
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 
 export async function loginTikTok(users: Array<IAccount>, userDataDir: string, headless: boolean) {
   const length = users.length / 10
   for (let i = 0; i < length; i++) {
-    await Promise.allSettled(
+    await Promise.all(
       Array.from({ length: 10 }).map(async (j, k) => {
         const pX = (k % 5) * 360
         const pY = (Math.floor(k / 5) % 3) * 500
         const userIndex = i * 10 + k
-        return await userLoginTikTok(
-          users[userIndex],
-          headless,
-          userDataDir,
-          `--window-position=${pX},${pY}`,
-        )
+        if (users[userIndex]) {
+          return await userLoginTikTok(
+            users[userIndex],
+            headless,
+            userDataDir,
+            `--window-position=${pX},${pY}`,
+          )
+        }
       }),
     )
   }

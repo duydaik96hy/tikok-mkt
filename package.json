@@ -6,8 +6,8 @@
   "main": "dist/electron/main.js",
   "scripts": {
     "watch": "tsc -w",
-    "start": "concurrently \"tsc -w\" \"vite\" \"nodemon --ignore src/electron/data/** --exec 'electron .'\"",
-    "dev": "concurrently \"tsc -w\" vite \"nodemon --ignore src/electron/data/** --exec electron .",
+    "start": "concurrently \"tsc -w\" \"vite\" \"nodemon --ignore src/electron/data/chrome/** --ignore src/electron/data/** --exec 'electron .'\"",
+    "dev": "concurrently \"tsc -w\" vite \"nodemon --ignore src/electron/data/chrome/** --ignore src/electron/data/** --exec electron .",
     "start-test": "concurrently vite \"electron .\"",
     "vite:build": "vite build",
     "build": "vite build && electron-builder --win --x64",
@@ -69,6 +69,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "adm-zip": "^0.5.16",
     "axios": "^1.8.1",
     "element-plus": "^2.9.4",
     "node-cron": "^3.0.3",
@@ -83,6 +84,7 @@
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
+    "@types/adm-zip": "^0.5.7",
     "@types/node": "^22.13.1",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/eslint-config-prettier": "^10.1.0",
