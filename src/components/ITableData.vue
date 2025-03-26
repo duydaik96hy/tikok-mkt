@@ -416,9 +416,15 @@ const rightActionList = ref<Array<IRightClickOption>>([
     ],
   },
   {
+    value: 'loginTiktok',
+    name: 'loginTiktok',
+    icon: 'tiktok',
+    showChild: false,
+  },
+  {
     value: 'loginMail',
     name: 'loginMail',
-    icon: 'facebook',
+    icon: 'hotmail',
     showChild: false,
   },
   // {
@@ -657,8 +663,13 @@ const clickFeild = (childs, typeActions) => {
       case 'loginHotmail':
         // proxy.$localSocket.emit('login-hotmail', selectedUserList)
         break
-      case 'loginFacebook':
-        // proxy.$localSocket.emit('login-facebook', selectedUserList)
+      case 'loginTiktok':
+        if (window) {
+          const win = window as any
+          if (win.api) {
+            win.api.send('actions', { type: 'login-tiktok', users: selectedUserList })
+          }
+        }
         break
       case 'updateAccountInfo':
         inputData.value = selectedUserList
