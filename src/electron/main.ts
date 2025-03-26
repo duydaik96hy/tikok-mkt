@@ -159,13 +159,14 @@ app.whenReady().then(() => {
   ipcMain.on('actions', (e, info: string) => {
     //
     const d: { type: string; data: any; users: Array<IAccount> } = JSON.parse(info)
-    const index = workerPool.findIndex((x) => x.type == d.type)
+
     switch (d.type) {
       case 'start-seeding-videos':
         data.baseSettings.seedings.seedingVideos = d.data
         createWorker(join(__dirname, '/worker/seedingVideo.js'), { ...d }, false)
         break
       case 'stop-seeding-videos':
+        const index = workerPool.findIndex((x) => x.type.includes('seeding-videos'))
         if (index != -1) {
           workerPool[index].worker.postMessage('exit')
         }
@@ -175,8 +176,9 @@ app.whenReady().then(() => {
         createWorker(join(__dirname, '/worker/buffFollow.js'), { ...d }, false)
         break
       case 'stop-buff-follow':
-        if (index != -1) {
-          workerPool[index].worker.postMessage('exit')
+        const i = workerPool.findIndex((x) => x.type.includes('buff-follow'))
+        if (i != -1) {
+          workerPool[i].worker.postMessage('exit')
         }
         break
       case 'login-tiktok':

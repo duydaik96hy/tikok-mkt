@@ -72,10 +72,13 @@ const stopActive = () => {
   if (window) {
     const win = window as any
     if (win.api) {
-      win.api.send('actions', {
-        type: 'stop-seeding-videos',
-        data: JSON.stringify(configuration.value),
-      })
+      win.api.send(
+        'actions',
+        JSON.stringify({
+          type: 'stop-seeding-videos',
+          data: {},
+        }),
+      )
     }
   }
 }

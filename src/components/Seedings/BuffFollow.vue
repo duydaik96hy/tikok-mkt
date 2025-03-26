@@ -83,6 +83,7 @@ const running = ref(false)
 const configuration = ref(store.baseSetiings.seedings.buffFollow)
 
 const startActive = () => {
+  running.value = true
   if (window) {
     const win = window as any
     if (win.api) {
@@ -103,10 +104,13 @@ const stopActive = () => {
   if (window) {
     const win = window as any
     if (win.api) {
-      win.api.send('actions', {
-        type: 'stop-buff-follow',
-        data: JSON.stringify(configuration.value),
-      })
+      win.api.send(
+        'actions',
+        JSON.stringify({
+          type: 'stop-buff-follow',
+          data: {},
+        }),
+      )
     }
   }
 }

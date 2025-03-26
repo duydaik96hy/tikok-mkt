@@ -106,6 +106,7 @@ export async function userSeedingVideo(
   description: string,
   userDataDir: string,
   position: string,
+  viewLiveTime: number[] = [10, 100],
 ): Promise<void> {
   if (!videoPath.startsWith('https://www.tiktok.com/')) {
     return
@@ -124,50 +125,59 @@ export async function userSeedingVideo(
   await page.goto(videoPath)
   const timeToWatch =
     Math.floor(Math.random() * (viewVideoTime[1] - viewVideoTime[0] + 1)) + viewVideoTime[0]
-  await timeout(1000)
-  // await checkAndLoginTiktokIfNeeded(page, user, headless, userDataDir, position)
-  if (Math.random() < 0.65) {
-    await page.waitForSelector('span[data-e2e="like-icon"]', { visible: true, timeout: 5000 })
+  if (videoPath.includes('/live')) {
+    const eles = await page.$$(
+      '#tiktok-live-main-container-id > div:nth-child(3) > div > div > div > div > div > div > div > div > div',
+    )
 
-    const likeButtons = await page.$('span[data-e2e="like-icon"]')
-    if (likeButtons) {
-      await likeButtons.click()
-    }
-  }
-  if (Math.random() < 0.5) {
-    const commentButtons = await page.$('span[data-e2e="comment-icon"]')
-    if (commentButtons) {
-      await commentButtons.click()
-      await timeout(1000)
-      const commentInput = await page.waitForSelector('div[data-e2e="comment-text"]', {
-        visible: true,
-        timeout: 10000,
-      })
-      let commentData = 'Hello!'
-      const title = await page.evaluate(() => {
-        const titleElement = document.querySelector('div[data-e2e="browse-video-desc"]')
-        return titleElement ? (titleElement as any).innerText.trim() : 'Không tìm thấy title!'
-      })
-      if (description) {
-        commentData = await generateComment(description)
-      } else {
-        commentData = await generateComment(title)
+    // viewLiveTime
+  } else {
+    await timeout(1000)
+    // await checkAndLoginTiktokIfNeeded(page, user, headless, userDataDir, position)
+    if (Math.random() < 0.65) {
+      await page.waitForSelector('span[data-e2e="like-icon"]', { visible: true, timeout: 5000 })
+
+      const likeButtons = await page.$('span[data-e2e="like-icon"]')
+      if (likeButtons) {
+        await likeButtons.click()
       }
-      if (commentInput) {
-        await commentInput.click()
-        await commentInput.type(commentData, { delay: 100 })
-        await timeout(2000)
-        const postButton = await page.waitForSelector('div[data-e2e="comment-post"]', {
+    }
+    if (Math.random() < 0.5) {
+      const commentButtons = await page.$('span[data-e2e="comment-icon"]')
+      if (commentButtons) {
+        await commentButtons.click()
+        await timeout(1000)
+        const commentInput = await page.waitForSelector('div[data-e2e="comment-text"]', {
           visible: true,
+          timeout: 10000,
         })
-        if (postButton) {
-          await postButton.click()
+        let commentData = 'Hello!'
+        const title = await page.evaluate(() => {
+          const titleElement = document.querySelector('div[data-e2e="browse-video-desc"]')
+          return titleElement ? (titleElement as any).innerText.trim() : 'Không tìm thấy title!'
+        })
+        if (description) {
+          commentData = await generateComment(description)
+        } else {
+          commentData = await generateComment(title)
+        }
+        if (commentInput) {
+          await commentInput.click()
+          await commentInput.type(commentData, { delay: 100 })
+          await timeout(2000)
+          const postButton = await page.waitForSelector('div[data-e2e="comment-post"]', {
+            visible: true,
+          })
+          if (postButton) {
+            await postButton.click()
+          }
         }
       }
     }
+    await timeout(timeToWatch * 1000)
+    await timeout(3000)
   }
-  await timeout(timeToWatch * 1000)
-  await timeout(3000)
+
   const quitButton = await page.$$('button[data-e2e="browse-close"]')
   await quitButton[0].click()
   await timeout(1000)
@@ -335,7 +345,6 @@ export async function seedingVideo(
   const length = users.length / data.numberOfStreams
   const listPath = data.idLists.split('\n').filter((i: string) => i)
   let pathIndex = 0
-  console.log(data)
   for (let i = 0; i < length; i++) {
     try {
       await Promise.all(
