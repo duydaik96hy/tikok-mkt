@@ -128,9 +128,10 @@ export async function userSeedingVideo(
   const timeToWatch =
     Math.floor(Math.random() * (viewVideoTime[1] - viewVideoTime[0] + 1)) + viewVideoTime[0]
   if (videoPath.includes('/live')) {
-    await timeout(3000)
     const randomViewLiveTime =
       Math.floor(Math.random() * (viewLiveTime[1] - viewLiveTime[0] + 1)) + viewLiveTime[0]
+    const randomCmt = Math.random() * randomViewLiveTime * 0.5 + randomViewLiveTime / 4
+    await timeout(randomCmt * 1000)
     let eles = await page.$$(
       '#tiktok-live-main-container-id > div:nth-child(3) > div > div > div > div > div > div > div > div > div',
     )
@@ -162,8 +163,7 @@ export async function userSeedingVideo(
       likeBtn.click()
       await timeout(100)
     }
-    await timeout(2000)
-    // await autoLike(likeBtn, Math.random() * 3, 0, randomViewLiveTime)
+    await timeout((randomViewLiveTime - randomCmt) * 1000)
 
     // viewLiveTime
   } else {
