@@ -5,7 +5,7 @@ import { launch, timeout } from '../libs/baseFunction'
 import axios from 'axios'
 import { IAccount } from '../model/userInfomation'
 import { parentPort } from 'worker_threads'
-import { Page } from 'puppeteer'
+import { ElementHandle, Page } from 'puppeteer'
 
 const stealthPlugin = StealthPlugin()
 stealthPlugin.enabledEvasions.delete('iframe.contentWindow')
@@ -122,13 +122,48 @@ export async function userSeedingVideo(
   }
   const browser = await launch(user, headless, position, userDataDir)
   const page = await browser.newPage()
+  await page.goto('https://www.tiktok.com/')
+  await timeout(1000)
   await page.goto(videoPath)
   const timeToWatch =
     Math.floor(Math.random() * (viewVideoTime[1] - viewVideoTime[0] + 1)) + viewVideoTime[0]
   if (videoPath.includes('/live')) {
-    const eles = await page.$$(
+    await timeout(3000)
+    const randomViewLiveTime =
+      Math.floor(Math.random() * (viewLiveTime[1] - viewLiveTime[0] + 1)) + viewLiveTime[0]
+    let eles = await page.$$(
       '#tiktok-live-main-container-id > div:nth-child(3) > div > div > div > div > div > div > div > div > div',
     )
+
+    const comment = eles[eles.length - 2]
+    comment.click()
+    let commentData = 'Hello!'
+    const title = await page.evaluate(() => {
+      const titleElement = document.querySelector('div[data-e2e="browse-video-desc"]')
+      return titleElement ? (titleElement as any).innerText.trim() : 'Không tìm thấy title!'
+    })
+    if (description) {
+      commentData = await generateComment(description)
+    } else {
+      commentData = await generateComment(title)
+    }
+    await page.keyboard.type(commentData, { delay: 30 })
+    await timeout(1000)
+    await page.keyboard.press('Enter')
+    await timeout(1000)
+    eles = await page.$$(
+      '#tiktok-live-main-container-id > div:nth-child(3) > div > div > div > div > div > div > div > div > div',
+    )
+    const likeBtn = eles[eles.length - 3]
+
+    const randomLike = Math.ceil(Math.random() * 20)
+
+    for (let l = 0; l < randomLike; l++) {
+      likeBtn.click()
+      await timeout(100)
+    }
+    await timeout(2000)
+    // await autoLike(likeBtn, Math.random() * 3, 0, randomViewLiveTime)
 
     // viewLiveTime
   } else {
@@ -179,7 +214,7 @@ export async function userSeedingVideo(
   }
 
   const quitButton = await page.$$('button[data-e2e="browse-close"]')
-  await quitButton[0].click()
+  if (quitButton[0]) await quitButton[0].click()
   await timeout(1000)
   await page.keyboard.press('ArrowDown')
   await timeout(2000)
@@ -396,6 +431,29 @@ export async function loginTikTok(users: Array<IAccount>, userDataDir: string, h
   }
 }
 
+async function autoLike(
+  ele: ElementHandle<HTMLDivElement>,
+  randomTime: number,
+  currentTime: number,
+  endTime: number,
+) {
+  const randomLike = Math.ceil(Math.random() * 20)
+  try {
+    for (let l = 0; l < randomLike; l++) {
+      ele.click()
+      await timeout(100)
+    }
+    // if (currentTime < endTime) {
+    //   setTimeout(async () => {
+    //     const r = Math.random() * 15
+    //     await autoLike(ele, r, r + currentTime, endTime)
+    //   }, 10 * 1000)
+    // }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 async function generateComment(title: string): Promise<string> {
   const response = await axios.post(
     'http://155.159.255.140:3000/api/common/comment/generate',
@@ -425,3 +483,5 @@ async function convertAudioToText(url: string): Promise<string> {
   )
   return response.data?.data
 }
+
+// TUXModal captcha-verify-container
