@@ -198,6 +198,16 @@ function createWorker(link: string, data: any, headless: boolean) {
     if (message === 'closed-browser') {
       worker.terminate()
     }
+    if (message.type) {
+      switch (message.type) {
+        case 'login-status':
+          sendToClient('status', JSON.stringify(message.data))
+          break
+
+        default:
+          break
+      }
+    }
   })
   worker.postMessage(
     JSON.stringify({

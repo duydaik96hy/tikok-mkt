@@ -534,40 +534,7 @@ const checkAll = ref(false)
 
 const isCopyAction = ref()
 const rightActionRef = ref()
-
-// if (proxy.$localSocket) {
-//   proxy.$localSocket.on('action-status', (d) => {
-//     const i = data.value.findIndex((x) => x.uid == d.uid)
-//     if (i != -1)
-//       data.value = [
-//         ...data.value.slice(0, i),
-//         {
-//           ...data.value[i],
-//           actionStatus: { type: d.type, value: proxy.$t('code.' + d.message) },
-//         },
-//         ...data.value.slice(i + 1),
-//       ]
-//   })
-//   proxy.$localSocket.on('user-status', (d) => {
-//     store.editAccount(d.user)
-//     nextTick(() => {
-//       const i = data.value.findIndex((x) => x.uid == d.user.uid)
-//       if (i != -1)
-//         data.value = [
-//           ...data.value.slice(0, i),
-//           {
-//             ...data.value[i],
-//             status: d.user.status,
-//             actionStatus: {
-//               type: d.type,
-//               value: proxy.$t('code.' + d.user.status.type),
-//             },
-//           },
-//           ...data.value.slice(i + 1),
-//         ]
-//     })
-//   })
-// }
+let win: any = null
 
 onMounted(() => {
   const table = document.getElementById('table')
@@ -576,6 +543,17 @@ onMounted(() => {
       e.preventDefault()
     })
   }
+  if (window) win = window
+  win.api.receive('status', (e) => {
+    if (e.type == 'login-status') {
+      const i = data.value.findIndex((x) => x.id == e.data.user.id)
+      if (i != -1)
+        data.value[i].actionStatus = {
+          value: e.data.message,
+          status: e.data.status,
+        }
+    }
+  })
 })
 
 const updateAccountInfo = () => {
@@ -664,14 +642,8 @@ const clickFeild = (childs, typeActions) => {
         // proxy.$localSocket.emit('login-hotmail', selectedUserList)
         break
       case 'loginTiktok':
-        if (window) {
-          const win = window as any
-          if (win.api) {
-            win.api.send(
-              'actions',
-              JSON.stringify({ type: 'login-tiktok', users: selectedUserList }),
-            )
-          }
+        if (win.api) {
+          win.api.send('actions', JSON.stringify({ type: 'login-tiktok', users: selectedUserList }))
         }
         break
       case 'updateAccountInfo':

@@ -95,6 +95,15 @@ export async function userLoginTikTok(
     throw Error(`Unable to login TikTok with username: ${user.username}`)
   } catch (error) {
     console.log(error)
+    parentPort?.postMessage({
+      type: 'login-status',
+      data: {
+        status: false,
+        message: 'Đăng nhập thất bại , vui lòng thử lại sau!',
+        user,
+      },
+    })
+    await browser.close()
   }
 }
 
@@ -120,6 +129,7 @@ export async function userSeedingVideo(
       }
     })
   }
+
   const browser = await launch(user, headless, position, userDataDir)
   const page = await browser.newPage()
   await page.goto('https://www.tiktok.com/')
