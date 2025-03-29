@@ -27,6 +27,7 @@ public
 *.njsproj
 *.sln
 *.sw?
+.env
 
 *.tsbuildinfo
 /src/electron/data/

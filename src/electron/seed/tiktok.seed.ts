@@ -24,6 +24,29 @@ puppeteer.use(stealthPlugin)
 // }
 //
 
+// export async function signInTikTok(page: Page,username: string, password: string) {
+//   await page.waitForSelector('[data-e2e="channel-item"]', { visible: true })
+//   const buttons = await page.$$('[data-e2e="channel-item"]')
+//   await buttons[1].click()
+//   await timeout(1000)
+//   await page.click('a[href="/login/phone-or-email/email"]')
+//   await timeout(1000)
+//
+//   const frames = await page.frames()
+//   const frame = frames[0]
+//   await frame.waitForSelector('input[type="text"]')
+//   await frame.type('input[type="text"]', username, { delay: 100 })
+//   await timeout(1000)
+//   await frame.waitForSelector('input[type="password"]')
+//   await frame.type('input[type="password"]', password, { delay: 100 })
+//
+//   const loginButton = await frame.waitForSelector('button[data-e2e="login-button"]')
+//   await loginButton?.click();
+//   await checkAndByPassCaptchaIfNeeded(page);
+//   await page.waitForNavigation()
+//   return page
+// }
+
 export async function userLoginTikTok(
   user: IAccount,
   headless: boolean,
@@ -246,7 +269,7 @@ export async function userSeedingVideo(
 //   if (loginButton.length) {
 //     await loginButton[loginButton.length - 1].click();
 //     await timeout(1000)
-//     await loginTikTok(page, username, password)
+//     await signInTikTok(page,username, password)
 //   }
 // }
 export async function checkAndLoginTiktokIfNeeded(
